@@ -1,52 +1,107 @@
 <?php
+require_once "models/front/API.manager.php";
+
+// méthodes
 class APIController
 {
-    public function getBrands()
+    private $apiManager;
+
+    public function __construct()
     {
-        echo "Envoi des informations sur les marques";
+        //J'instancie l'apiManager
+        $this->apiManager = new APIManager();
     }
-    public function getCars($idCars)
+
+
+
+    public function getCars()
     {
-        echo "Données JSON sur la voiture" . $idCars . "demandée";
+        // je récupère toutes les informations via APIManager avec la fonction getDBCars
+        $cars = $this->apiManager->getDBCars();
+        echo "<pre>";
+        print_r($cars);
+        echo "</pre>";
     }
+
     public function getModels($idModels)
-    {
-        echo "Données JSON sur les modèles" . $idModels . "demandée";
+    { // je récupère toutes les informations via APIManager avec la fonction getDBModels
+        $models = $this->apiManager->getDBModels($idModels);
+        echo "<pre>";
+        print_r($models);
+        echo "</pre>";
     }
-    public function getGarage($idGarage)
-    {
-        echo "Données JSON sur le garage" . $idGarage . "demandée";
+
+    public function getBrands()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBBrands
+        $brands = $this->apiManager->getDBBrands();
+        echo "<pre>";
+        print_r($brands);
+        echo "</pre>";
     }
-    public function getImages($idImages)
+
+    public function getGarage()
     {
-        echo "Données JSON sur les images" . $idImages . "demandée";
+        $garage = $this->apiManager->getDBGarage();
+        echo "<pre>";
+        print_r($garage);
+        echo "</pre>";
     }
-    public function getTestimonials($idTestimonials)
+
+    // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
+    private function displayData($datas)
     {
-        echo "Données JSON sur les témoignages" . $idTestimonials . "demandée";
+        echo "<pre>";
+        print_r($datas);
+        echo "</pre>";
     }
-    public function getOpening($idOpening)
+    // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
+    public function getImages()
     {
-        echo "Données JSON sur les horaires" . $idOpening . "demandée";
+        $images = $this->apiManager->getDBImages();
+        $this->displayData($images);
     }
-    public function getGarageServices($idGarageServices)
+
+    public function getTestimonials()
     {
-        echo "Données JSON sur les services" . $idGarageServices . "demandée";
+        $testimonials = $this->apiManager->getDBTestimonials();
+        $this->displayData($testimonials);
     }
+
+    public function getOpening()
+    {
+        $opening = $this->apiManager->getDBOpening();
+        $this->displayData($opening);
+    }
+
+    public function getGarageServices()
+    {
+        $services = $this->apiManager->getDBGarageServices();
+        $this->displayData($services);
+    }
+
     public function getOptions($idOptions)
     {
-        echo "Données JSON sur les options" . $idOptions . "demandée";
+        echo "Données JSON sur les options" . $idOptions . "demandées";
     }
+
     public function getManufactureYears($idManufactureYears)
     {
-        echo "Données JSON sur les années de fabrication" . $idManufactureYears . "demandée";
+        echo "Données JSON sur les années de fabrication" . $idManufactureYears . "demandées";
     }
+
     public function getEnergyType($idEnergytype)
     {
-        echo "Données JSON sur les energies utilisées" . $idEnergytype . "demandée";
+        echo "Données JSON sur les energies utilisées" . $idEnergytype . "demandées";
     }
+
     public function getCarAnnonce($idCarAnnonce)
     {
-        echo "Données JSON sur les annonces" . $idCarAnnonce . "demandée";
+        echo "Données JSON sur les annonces" . $idCarAnnonce . "demandées";
+    }
+
+    public function getUsers()
+    {
+        $users = $this->apiManager->getDBUsers();
+        $this->displayData($users);
     }
 }

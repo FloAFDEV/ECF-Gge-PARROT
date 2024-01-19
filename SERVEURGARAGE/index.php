@@ -18,52 +18,45 @@ try {
         switch ($url[0]) {
             case "front":
                 switch ($url[1]) {
-                    case "brands":
-                        $apiController->getBrands();
-                        break;
                     case "cars":
-                        if (empty($url[2])) throw new Exception("Identifiant de la voiture demandée manquant");
-                        $apiController->getCars($url[2]);
+                        $apiController->getCars();
                         break;
                     case "models":
-                        if (empty($url[3])) throw new Exception("Identifiant du modèle demandé manquant");
-                        $apiController->getModels($url[3]);
+                        if (empty($url[2])) throw new Exception("Identifiant des modèles demandée manquant");
+                        $apiController->getModels($url[2]);
+                        break;
+                    case "brands":
+                        $apiController->getBrands();;
                         break;
                     case "garage":
-                        if (empty($url[4])) throw new Exception("Identifiant du garage demandé manquant");
-                        $apiController->getGarage($url[4]);
+                        $apiController->getGarage();
                         break;
                     case "images":
-                        if (empty($url[5])) throw new Exception("Identifiant de l'image demandée manquant");
-                        $apiController->getImages($url[5]);
+                        $apiController->getImages();
                         break;
                     case "testimonials":
-                        if (empty($url[6])) throw new Exception("Identifiant du témoignage demandé manquant");
-                        $apiController->getTestimonials($url[6]);
+                        $apiController->getTestimonials();
                         break;
                     case "opening":
-                        if (empty($url[7])) throw new Exception("Identifiant de l'horaire demandé manquant");
-                        $apiController->getOpening($url[7]);
+                        $apiController->getOpening();
                         break;
                     case "services":
-                        if (empty($url[8])) throw new Exception("Identifiant du service demandé manquant");
-                        $apiController->getGarageServices($url[8]);
+                        $apiController->getGarageServices();
                         break;
                     case "options":
-                        if (empty($url[9])) throw new Exception("Identifiant de l'option demandée manquant");
-                        $apiController->getOptions($url[9]);
+                        $apiController->getOptions();
                         break;
                     case "manufactureYears":
-                        if (empty($url[10])) throw new Exception("Identifiant de l'année de fabrication demandée manquant");
-                        $apiController->getManufactureYears($url[10]);
+                        $apiController->getManufactureYears();
                         break;
                     case "energyType":
-                        if (empty($url[11])) throw new Exception("Identifiant de l'énergie demandée manquant");
-                        $apiController->getEnergyType($url[11]);
+                        $apiController->getEnergyType();
                         break;
                     case "annonce":
-                        if (empty($url[12])) throw new Exception("Identifiant de l'annonce demandée manquant");
-                        $apiController->getCarAnnonce($url[12]);
+                        $apiController->getCarAnnonce();
+                        break;
+                    case "users":
+                        $apiController->getUsers();
                         break;
                     default:
                         throw new Exception("Oups cette page n'éxiste pas");
