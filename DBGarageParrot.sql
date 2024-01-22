@@ -243,6 +243,10 @@ CREATE TABLE ModelsManufactureYears
     FOREIGN KEY (Id_Model) REFERENCES Models (Id_Model) ON DELETE CASCADE,
     FOREIGN KEY (Id_ManufactureYears) REFERENCES ManufactureYears (Id_ManufactureYears)
 ) ENGINE = InnoDB;
+
+
+
+
 -- Modification des tables + ajout de données fictives
 
     -- Dans EnergyType
@@ -490,25 +494,30 @@ VALUES
 -- Sélection des noms de marque et de modèle
 -- SELECT Brands.brand_name, Models.model_name
 -- FROM Brands
--- JOIN Models ON Brands.Id_Brand = Models.Id_Brand;
+-- INNER JOIN Models ON Brands.Id_Brand = Models.Id_Brand;
+
 
 -- Sélection des annonces de voiture valides
 -- SELECT * FROM CarAnnonce WHERE valid = TRUE;
+
 
 -- Sélection des informations sur les voitures avec leur annonce associée
 -- SELECT Cars.*, CarAnnonce.title
 -- FROM Cars
 -- JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce;
 
+
 -- Sélection des services d'un garage spécifique (Id_Garage = 1)
 -- SELECT GarageServices.*
 -- FROM GarageServices
 -- WHERE GarageServices.Id_Garage = 1;
 
+
 -- Sélection des images liées à une annonce de voiture spécifique (Id_CarAnnonce = 5)
 -- SELECT Images.*
 -- FROM Images
 -- WHERE Images.Id_CarAnnonce = 5;
+
 
 -- Sélection des informations détaillées sur les voitures avec leurs marques et annonces associées
 -- SELECT
@@ -527,21 +536,24 @@ VALUES
 --     LEFT JOIN Cars ON Models.Id_Cars = Cars.Id_Cars
 --     LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce;
 
+
 -- Sélection des identifiants uniques d'annonces de voiture
 -- SELECT DISTINCT Id_CarAnnonce FROM Cars;
 
+
 -- Sélection des informations sur les voitures avec leurs marques associées
-SELECT
-    Cars.mileage,
-    Cars.registration,
-    Cars.price,
-    Cars.description,
-    Cars.main_image_url,
-    Brands.brand_name,
-    Models.model_name
-FROM Cars
-INNER JOIN Models ON Models.Id_Cars = Cars.Id_Cars
-INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand;
+-- SELECT
+--     Cars.mileage,
+--     Cars.registration,
+--     Cars.price,
+--     Cars.description,
+--     Cars.main_image_url,
+--     Brands.brand_name,
+--     Models.model_name
+-- FROM Cars
+-- INNER JOIN Models ON Models.Id_Cars = Cars.Id_Cars
+-- INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand;
+
 
 -- Sélection de toutes les colonnes de la table Cars
 -- SELECT * FROM Cars;
@@ -563,38 +575,8 @@ INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand;
 --     C.main_image_url
 -- FROM
 --     Models M
--- JOIN Brands B ON M.Id_Brand = B.Id_Brand
--- JOIN Cars C ON M.Id_Cars = C.Id_Cars;
-
-
-SELECT Id_Model
-FROM Models;
-
-
-SELECT Id_Model
-FROM ModelsManufactureYears;
-
-
-SELECT
-    Cars.*,
-    Models.model_name,
-    Models.category_model,
-    Brands.brand_name,
-    ManufactureYears.manufacture_year,
-    EnergyType.fuel_type,
-    CarAnnonce.title AS annonce_title,
-    CarAnnonce.createdAt AS annonce_createdAt,
-    Garage.garageName AS annonce_garageName
-FROM
-    Cars
-JOIN Models ON Cars.Id_Cars = Models.Id_Cars
-JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
-JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
-JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
-JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
-JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
-LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
-LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
+-- INNER JOIN Brands B ON M.Id_Brand = B.Id_Brand
+-- INNER JOIN Cars C ON M.Id_Cars = C.Id_Cars;
 
 SELECT
     Cars.Id_Cars,
@@ -613,12 +595,12 @@ SELECT
     Garage.garageName
 FROM
     Cars
-JOIN Models ON Models.Id_Cars = Cars.Id_Cars
-JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
-JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
-JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
-JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
-JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+INNER JOIN Models ON Models.Id_Cars = Cars.Id_Cars
+INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
 LEFT JOIN CarAnnonce ON Cars.Id_Cars = CarAnnonce.Id_CarAnnonce
 LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
 
@@ -629,36 +611,37 @@ SELECT
     Garage.garageName
 FROM
     CarAnnonce
-JOIN
+INNER JOIN
     Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
 
-SELECT
-        Cars.*,
-        Models.model_name,
-        Models.category_model,
-        Brands.brand_name,
-        Brands.brand_logo_url,
-        ManufactureYears.manufacture_year,
-        EnergyType.fuel_type,
-        CarAnnonce.title AS annonce_title,
-        CarAnnonce.createdAt AS annonce_createdAt,
-        Garage.garageName AS annonce_garageName
-    FROM
-        Cars
-    JOIN Models ON Cars.Id_Cars = Models.Id_Cars
-    JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
-    JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
-    JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
-    JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
-    JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
-    LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
-    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
 
 SELECT * FROM ModelsManufactureYears;
 
 
+SELECT * FROM Cars WHERE Id_Cars = (SELECT Id_Cars FROM CarAnnonce WHERE Id_CarAnnonce = 7);
 
 
+SELECT
+    Cars.*,
+    Models.model_name,
+    Models.category_model,
+    Brands.brand_name,
+    Brands.brand_logo_url,
+    ManufactureYears.manufacture_year,
+    EnergyType.fuel_type,
+    CarAnnonce.title AS annonce_title,
+    CarAnnonce.createdAt AS annonce_createdAt,
+    Garage.garageName AS annonce_garageName
+FROM
+    Cars
+INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
 
 
 

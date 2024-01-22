@@ -145,6 +145,12 @@ class APIManager extends Model
         return $this->executeAndFetchAll($req);
     }
 
+    public function getDBOptions()
+    {
+        $req = "SELECT * FROM Options";
+        return $this->executeAndFetchAll($req);
+    }
+
     public function getDBManufactureYears()
     {
         $req = "SELECT * FROM ManufactureYears";
@@ -160,6 +166,18 @@ class APIManager extends Model
     public function getDBidCarAnnonce()
     {
         $req = "SELECT * FROM CarAnnonce";
+        return $this->executeAndFetchAll($req);
+    }
+
+    public function getDBMessage()
+    {
+        $req = "SELECT * FROM MessageAnnonce";
+        return $this->executeAndFetchAll($req);
+    }
+
+    public function getDBResetPassword()
+    {
+        $req = "SELECT * FROM ResetPassword";
         return $this->executeAndFetchAll($req);
     }
 

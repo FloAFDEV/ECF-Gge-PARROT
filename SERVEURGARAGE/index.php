@@ -58,6 +58,12 @@ try {
                     case "users":
                         $apiController->getUsers();
                         break;
+                    case "message":
+                        $apiController->getMessage();
+                        break;
+                    case "password":
+                        $apiController->getResetPassword();
+                        break;
                     default:
                         throw new Exception("Oups cette page n'éxiste pas");
                 }

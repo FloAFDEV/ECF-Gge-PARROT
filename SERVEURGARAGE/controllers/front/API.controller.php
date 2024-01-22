@@ -1,5 +1,6 @@
 <?php
 require_once "models/front/API.manager.php";
+require_once "models/Model.php";
 
 // méthodes
 class APIController
@@ -12,41 +13,6 @@ class APIController
         $this->apiManager = new APIManager();
     }
 
-
-
-    public function getCars()
-    {
-        // je récupère toutes les informations via APIManager avec la fonction getDBCars
-        $cars = $this->apiManager->getDBCars();
-        echo "<pre>";
-        print_r($cars);
-        echo "</pre>";
-    }
-
-    public function getModels($idModels)
-    { // je récupère toutes les informations via APIManager avec la fonction getDBModels
-        $models = $this->apiManager->getDBModels($idModels);
-        echo "<pre>";
-        print_r($models);
-        echo "</pre>";
-    }
-
-    public function getBrands()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBBrands
-        $brands = $this->apiManager->getDBBrands();
-        echo "<pre>";
-        print_r($brands);
-        echo "</pre>";
-    }
-
-    public function getGarage()
-    {
-        $garage = $this->apiManager->getDBGarage();
-        echo "<pre>";
-        print_r($garage);
-        echo "</pre>";
-    }
-
     // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
     private function displayData($datas)
     {
@@ -54,49 +20,90 @@ class APIController
         print_r($datas);
         echo "</pre>";
     }
-    // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
-    public function getImages()
+
+    public function getCars()
     {
+        // je récupère toutes les informations via APIManager avec la fonction getDBCars
+        $cars = $this->apiManager->getDBCars();
+        $this->displayData($cars);
+    }
+
+    public function getModels($idModels)
+    { // je récupère toutes les informations via APIManager avec la fonction getDBModels
+        $models = $this->apiManager->getDBModels($idModels);
+        $this->displayData($models);
+    }
+
+    public function getBrands()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBBrands
+        $brands = $this->apiManager->getDBBrands();
+        $this->displayData($brands);
+    }
+
+    public function getGarage()
+    { // je récupère toutes les informations via APIManager avec la fonction getGarage
+        $garage = $this->apiManager->getDBGarage();
+        $this->displayData($garage);
+    }
+
+    public function getImages()
+    { // je récupère toutes les informations via APIManager avec la fonction getImages
         $images = $this->apiManager->getDBImages();
         $this->displayData($images);
     }
 
     public function getTestimonials()
-    {
+    { // je récupère toutes les informations via APIManager avec la fonction getTestimonials
         $testimonials = $this->apiManager->getDBTestimonials();
         $this->displayData($testimonials);
     }
 
     public function getOpening()
-    {
+    { // je récupère toutes les informations via APIManager avec la fonction getDBOpening
         $opening = $this->apiManager->getDBOpening();
         $this->displayData($opening);
     }
 
     public function getGarageServices()
-    {
+    { // je récupère toutes les informations via APIManager avec la fonction getDBGarageServices
         $services = $this->apiManager->getDBGarageServices();
         $this->displayData($services);
     }
 
-    public function getOptions($idOptions)
-    {
-        echo "Données JSON sur les options" . $idOptions . "demandées";
+    public function getOptions()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBOptions
+        $idoptions = $this->apiManager->getDBOptions();
+        $this->displayData($idoptions);
     }
 
-    public function getManufactureYears($idManufactureYears)
-    {
-        echo "Données JSON sur les années de fabrication" . $idManufactureYears . "demandées";
+    public function getManufactureYears()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBManufactureYears
+        $manufactureYears = $this->apiManager->getDBManufactureYears();
+        $this->displayData($manufactureYears);
     }
 
-    public function getEnergyType($idEnergytype)
-    {
-        echo "Données JSON sur les energies utilisées" . $idEnergytype . "demandées";
+    public function getEnergyType()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBEnergyType
+        $energyType = $this->apiManager->getDBEnergyType();
+        $this->displayData($energyType);
     }
 
-    public function getCarAnnonce($idCarAnnonce)
-    {
-        echo "Données JSON sur les annonces" . $idCarAnnonce . "demandées";
+    public function getCarAnnonce()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBCarAnnonce
+        $carAnnonce = $this->apiManager->getDBidCarAnnonce();
+        $this->displayData($carAnnonce);
+    }
+
+    public function getMessage()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBMessage
+        $message = $this->apiManager->getDBMessage();
+        $this->displayData($message);
+    }
+
+    public function getResetPassword()
+    { // je récupère toutes les informations via APIManager avec la fonction getDBResetPassword
+        $resetPassword = $this->apiManager->getDBResetPassword();
+        $this->displayData($resetPassword);
     }
 
     public function getUsers()
