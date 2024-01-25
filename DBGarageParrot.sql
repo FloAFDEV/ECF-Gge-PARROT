@@ -404,6 +404,27 @@ VALUES ('Ouvert',
         1),
        ('Fermé', 'Dimanche', NULL, NULL, NULL, NULL, 1);
 
+-- Correction des horaires pour le lundi au vendredi
+UPDATE Opening
+SET morningOpen = '09:00:00',
+    morningClose = '12:00:00',
+    eveningOpen = '13:00:00',
+    eveningClose = '18:00:00'
+WHERE dayOfWeek IN ('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi');
+
+-- Mise à jour des horaires pour le samedi
+UPDATE Opening
+SET morningOpen = '09:00:00',
+    morningClose = '12:00:00',
+    eveningOpen = NULL,
+    eveningClose = NULL
+WHERE dayOfWeek = 'Samedi';
+
+-- Mise à jour des horaires pour le dimanche (fermé)
+UPDATE Opening
+SET storeStatus = 'Fermé'
+WHERE dayOfWeek = 'Dimanche';
+
 
 -- Dans GarageServices
 INSERT INTO GarageServices (serviceName,
@@ -489,6 +510,32 @@ INSERT INTO Testimonials (pseudo, userEmail, message, valid, note, createdAt, Id
 VALUES
     ('Chuck Norris', 'chuck@example.com', 'Les témoignages n\'ont pas besoin d\'être validés, ce sont les témoignages qui valident Chuck Norris.', true, 5.0, '2024-01-20 12:34:56', 3),
     ('Néo', 'neo@example.com', 'La cuillère n\'éxiste pas dans ces témoignages, juste la Matrice.', true, 4.5, '2024-01-20 14:45:30', 4);
+
+-- Ajout de "power" comme entier
+ALTER TABLE Cars ADD COLUMN power INT;
+
+-- Ajout de "power_unit" comme ENUM
+ALTER TABLE Cars ADD COLUMN power_unit ENUM('CV', 'KW');
+
+-- Mise à jour et insertion de la puissance et de l'unité pour chaque voiture en fonction de leur id récupéré dans PHPMyAdmin
+UPDATE Cars SET power = 120, power_unit = 'CV' WHERE Id_Cars = 13;
+UPDATE Cars SET power = 150, power_unit = 'CV' WHERE Id_Cars = 14;
+UPDATE Cars SET power = 110, power_unit = 'CV' WHERE Id_Cars = 15;
+UPDATE Cars SET power = 130, power_unit = 'CV' WHERE Id_Cars = 16;
+UPDATE Cars SET power = 180, power_unit = 'CV' WHERE Id_Cars = 17;
+UPDATE Cars SET power = 200, power_unit = 'CV' WHERE Id_Cars = 18;
+
+-- Ajout de la colonne 'color' à la table 'Cars'
+ALTER TABLE Cars
+ADD COLUMN color VARCHAR(50) DEFAULT NULL;
+
+-- Mise à jour la couleur pour chaque voiture
+UPDATE Cars SET color = 'Rouge' WHERE Id_Cars = 13;
+UPDATE Cars SET color = 'Bleu' WHERE Id_Cars = 14;
+UPDATE Cars SET color = 'Noir' WHERE Id_Cars = 15;
+UPDATE Cars SET color = 'Blanc' WHERE Id_Cars = 16;
+UPDATE Cars SET color = 'Gris' WHERE Id_Cars = 17;
+UPDATE Cars SET color = 'Argent' WHERE Id_Cars = 18;
 
 
 -- Sélection des noms de marque et de modèle
@@ -621,6 +668,19 @@ SELECT * FROM ModelsManufactureYears;
 SELECT * FROM Cars WHERE Id_Cars = (SELECT Id_Cars FROM CarAnnonce WHERE Id_CarAnnonce = 7);
 
 
+
+SELECT
+    Models.*,
+    Brands.brand_name,
+    Brands.brand_logo_url,
+    ManufactureYears.manufacture_year
+FROM
+    Models
+INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears;
+
+
 SELECT
     Cars.*,
     Models.model_name,
@@ -629,6 +689,9 @@ SELECT
     Brands.brand_logo_url,
     ManufactureYears.manufacture_year,
     EnergyType.fuel_type,
+    Cars.power,
+    Cars.power_unit,
+    Cars.color,
     CarAnnonce.title AS annonce_title,
     CarAnnonce.createdAt AS annonce_createdAt,
     Garage.garageName AS annonce_garageName
@@ -644,7 +707,187 @@ LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
 LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage;
 
 
+SELECT
+    Cars.Id_Cars,
+    Cars.mileage,
+    Cars.registration,
+    Cars.price,
+    Cars.description,
+    Cars.main_image_url,
+    CarAnnonce.Id_CarAnnonce,
+    CarAnnonce.title AS annonce_title,
+    CarAnnonce.createdAt AS annonce_createdAt,
+    Garage.garageName AS annonce_garageName,
+    Cars.power,
+    Cars.power_unit,
+    Cars.color,
+    Models.model_name,
+    Models.category_model,
+    Brands.brand_name,
+    Brands.brand_logo_url,
+    ManufactureYears.manufacture_year,
+    EnergyType.fuel_type,
+    GROUP_CONCAT(Options.options_name) AS options_name
+FROM
+    Cars
+INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+GROUP BY
+    Cars.Id_Cars,
+    Cars.mileage,
+    Cars.registration,
+    Cars.price,
+    Cars.description,
+    Cars.main_image_url,
+    CarAnnonce.Id_CarAnnonce,
+    CarAnnonce.title,
+    CarAnnonce.createdAt,
+    Garage.garageName,
+    Cars.power,
+    Cars.power_unit,
+    Cars.color,
+    Models.model_name,
+    Models.category_model,
+    Brands.brand_name,
+    Brands.brand_logo_url,
+    ManufactureYears.manufacture_year,
+    EnergyType.fuel_type;
+
+
+SELECT
+    Models.Id_Model,
+    Models.model_name,
+    Models.category_model,
+    Brands.brand_name,
+    Brands.brand_logo_url
+   FROM
+    Models
+INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+LEFT JOIN Cars ON Models.Id_Model = Cars.Id_Cars
+LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+GROUP BY
+    Models.Id_Model,
+    Models.model_name,
+    Models.category_model,
+    Brands.brand_name,
+    Brands.brand_logo_url;
 
 
 
 
+SELECT
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title AS annonce_title,
+        CarAnnonce.createdAt AS annonce_createdAt,
+        Garage.garageName AS annonce_garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type,
+        GROUP_CONCAT(Options.options_name) AS options_name
+    FROM
+        Cars
+    INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+    INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+    INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+    INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+    INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+    INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+    LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+    LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+    LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+    WHERE Cars.Id_Cars = :id
+        GROUP BY
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title,
+        CarAnnonce.createdAt,
+        Garage.garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type
+
+SELECT
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title AS annonce_title,
+        CarAnnonce.createdAt AS annonce_createdAt,
+        Garage.garageName AS annonce_garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type,
+        GROUP_CONCAT(Options.options_name) AS options_name
+    FROM
+        Cars
+    INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+    INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+    INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+    INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+    INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+    INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+    LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+    LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+    LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+    GROUP BY
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title,
+        CarAnnonce.createdAt,
+        Garage.garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type

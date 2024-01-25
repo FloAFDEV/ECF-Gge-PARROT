@@ -1,12 +1,11 @@
 <?php
 define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
     "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
-//On passe de http://localhost/..
+// On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
 require_once "controllers/front/API.controller.php";
 $apiController = new APIController();
-
 
 try {
     if (empty($_GET['page'])) {
@@ -15,15 +14,35 @@ try {
         $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
         if (!isset($url[0]) || !isset($url[1]))
             throw new Exception("La page demandée n'éxiste pas");
+
+        $allowedActions = [
+            "cars", "models", "brands", "garage", "images",
+            "testimonials", "opening", "services", "options",
+            "manufactureYears", "energyType", "annonces",
+            "users", "message", "password"
+        ];
+
+        if (!in_array($url[1], $allowedActions)) {
+            throw new Exception("Oups cette action n'éxiste pas");
+        }
+
         switch ($url[0]) {
             case "front":
                 switch ($url[1]) {
-                    case "cars":
-                        $apiController->getCars();
+                    case "annonces":
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            $apiController->getAnnonceByID($url[2]);
+                        } elseif (!isset($url[2])) {
+                            // Gérer le cas où aucun identifiant n'est fourni
+                            // Cela peut inclure la logique pour récupérer toutes les voitures
+                            $apiController->getAllAnnonces();
+                        } else {
+                            // Gérer le cas où l'identifiant n'est pas un nombre valide
+                            throw new Exception("Identifiant du véhicule invalide");
+                        }
                         break;
                     case "models":
-                        if (empty($url[2])) throw new Exception("Identifiant des modèles demandée manquant");
-                        $apiController->getModels($url[2]);
+                        $apiController->getModels();
                         break;
                     case "brands":
                         $apiController->getBrands();;
@@ -53,7 +72,7 @@ try {
                         $apiController->getEnergyType();
                         break;
                     case "annonce":
-                        $apiController->getCarAnnonce();
+                        $apiController->getCars();
                         break;
                     case "users":
                         $apiController->getUsers();
@@ -76,6 +95,8 @@ try {
         }
     }
 } catch (Exception $e) {
-    $msg = $e->getMessage();
-    echo $msg;
+    $error = [
+        'error' => $e->getMessage(),
+    ];
+    Model::sendJSON($error);
 }

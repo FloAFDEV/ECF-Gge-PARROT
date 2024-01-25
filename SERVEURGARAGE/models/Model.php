@@ -22,9 +22,11 @@ abstract class Model
         }
         return self::$pdo;
     }
-    // fonction statique appelable de n'imoorte où à partir de la classe "model" qui converti les informations en format JSON
+    // fonction statique appelable de n'importe où à partir de la classe "model" qui converti les informations en format JSON
     public static function sendJSON($info)
     {
+        header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/json; charset=UTF-8");
         echo json_encode($info);
     }
 }

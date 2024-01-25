@@ -7,20 +7,105 @@ require_once "models/Model.php";
 // APIManager appelle la classe Model
 class APIManager extends Model
 {
-    public function getDBCars()
+
+    //requête pour getAllAnnonces
+
+    public function getAllAnnonces()
     {
-        //requête pour Cars
+        // Requête pour récupérer toutes les voitures
         $req = "SELECT
-        Cars.*,
+            Cars.Id_Cars,
+            Cars.mileage,
+            Cars.registration,
+            Cars.price,
+            Cars.description,
+            Cars.main_image_url,
+            CarAnnonce.Id_CarAnnonce,
+            CarAnnonce.title AS annonce_title,
+            CarAnnonce.createdAt AS annonce_createdAt,
+            Garage.garageName AS annonce_garageName,
+            Cars.power,
+            Cars.power_unit,
+            Cars.color,
+            Models.model_name,
+            Models.category_model,
+            Brands.brand_name,
+            Brands.brand_logo_url,
+            ManufactureYears.manufacture_year,
+            EnergyType.fuel_type,
+            GROUP_CONCAT(Options.options_name) AS options_name
+        FROM
+            Cars
+        INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+        INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+        INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+        INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+        INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+        INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+        LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+        LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+        LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+        LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+        GROUP BY
+            Cars.Id_Cars,
+            Cars.mileage,
+            Cars.registration,
+            Cars.price,
+            Cars.description,
+            Cars.main_image_url,
+            CarAnnonce.Id_CarAnnonce,
+            CarAnnonce.title,
+            CarAnnonce.createdAt,
+            Garage.garageName,
+            Cars.power,
+            Cars.power_unit,
+            Cars.color,
+            Models.model_name,
+            Models.category_model,
+            Brands.brand_name,
+            Brands.brand_logo_url,
+            ManufactureYears.manufacture_year,
+            EnergyType.fuel_type
+        ";
+
+        try {
+            $stmt = $this->getBdd()->prepare($req);
+            $stmt->execute();
+            $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return $cars;
+        } catch (PDOException $e) {
+            error_log("PDO Error in getAllAnnonces: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
+
+    public function getAnnonceByID($id)
+    {
+        //requête pour AnnoncesByID
+        $req = "SELECT
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title AS annonce_title,
+        CarAnnonce.createdAt AS annonce_createdAt,
+        Garage.garageName AS annonce_garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
         Models.model_name,
         Models.category_model,
         Brands.brand_name,
         Brands.brand_logo_url,
         ManufactureYears.manufacture_year,
         EnergyType.fuel_type,
-        CarAnnonce.title AS annonce_title,
-        CarAnnonce.createdAt AS annonce_createdAt,
-        Garage.garageName AS annonce_garageName
+        GROUP_CONCAT(Options.options_name) AS options_name
     FROM
         Cars
     INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
@@ -30,41 +115,113 @@ class APIManager extends Model
     INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
     INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
     LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
-    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage";
+    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+    LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+    LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+    WHERE Cars.Id_Cars = :id
+        GROUP BY
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title,
+        CarAnnonce.createdAt,
+        Garage.garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type
+    ";
 
-        //je prépare la requête dans le statement
-        $stmt = $this->getBdd()->prepare($req);
-        // Je lance son execution
-        $stmt->execute();
-        // Je récupère les données
-        $Cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // Je ferme le cursor pour finir la requete et la connexion à la DB
-        $stmt->closeCursor();
-        // Je retourne les données au controller
-        return $Cars;
+        try {
+            // Je prépare la requête dans le statement
+            $stmt = $this->getBdd()->prepare($req);
+            // Je lie le paramètre :id à la valeur de $id
+            $id = filter_var($id, FILTER_VALIDATE_INT);
+            $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+            // Je lance son exécution
+            $stmt->execute();
+            // Je récupère les données
+            $car = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Je ferme le curseur pour finir la requête et la connexion à la DB
+            $stmt->closeCursor();
+            // Je retourne les données au controller
+            return $car;
+        } catch (PDOException $e) {
+            // Je gère l'exception en loggant l'erreur
+            error_log("Error in getAnnonceByID: " . $e->getMessage());
+            // Je renvoie une réponse adaptée à l'erreur
+            return [];
+        }
     }
 
-    public function getDBModels($idModels)
+
+    public function getDBModels()
     {
         //requête pour Models
         $req = "SELECT
-        Models.*,
-        Brands.brand_name,
-        Brands.brand_logo_url,
+        Cars.*,
         Models.model_name,
         Models.category_model,
-        ManufactureYears.manufacture_year
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        CarAnnonce.title AS annonce_title,
+        CarAnnonce.createdAt AS annonce_createdAt,
+        Garage.garageName AS annonce_garageName,
+        GROUP_CONCAT(Options.options_name) AS options_name
     FROM
-        Models
-        INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
-        INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
-        INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
-        WHERE Models.Id_Model = :idModels";
+        Cars
+        INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
+    INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
+    INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
+    INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
+    INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
+    INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
+    LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
+    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
+    LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
+    LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
+    GROUP BY
+        Cars.Id_Cars,
+        Cars.mileage,
+        Cars.registration,
+        Cars.price,
+        Cars.description,
+        Cars.main_image_url,
+        CarAnnonce.Id_CarAnnonce,
+        CarAnnonce.title,
+        CarAnnonce.createdAt,
+        Garage.garageName,
+        Cars.power,
+        Cars.power_unit,
+        Cars.color,
+        Models.model_name,
+        Models.category_model,
+        Brands.brand_name,
+        Brands.brand_logo_url,
+        ManufactureYears.manufacture_year,
+        EnergyType.fuel_type
+    ";
 
         //je prépare la requête dans le statement
         $stmt = $this->getBdd()->prepare($req);
+
         // Je type les données avec PDO::PARAM_INT
-        $stmt->bindValue(":idModels", $idModels, PDO::PARAM_INT);
+        // $stmt->bindValue(":idModels", $idModels, PDO::PARAM_INT);
+
         // Je lance son execution
         $stmt->execute();
         // Je récupère les données
@@ -112,12 +269,19 @@ class APIManager extends Model
 
     // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
     private function executeAndFetchAll($req)
+
     {
-        $stmt = $this->getBdd()->prepare($req);
-        $stmt->execute();
-        $datas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $stmt->closeCursor();
-        return $datas;
+        try {
+            $stmt = $this->getBdd()->prepare($req);
+            $stmt->execute();
+            $datas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return $datas;
+        } catch (PDOException $e) {
+            // Loguer l'erreur
+            error_log("PDO Error in executeAndFetchAll: " . $e->getMessage());
+            return [];
+        }
     }
     // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
 
@@ -163,9 +327,9 @@ class APIManager extends Model
         return $this->executeAndFetchAll($req);
     }
 
-    public function getDBidCarAnnonce()
+    public function getDBCars()
     {
-        $req = "SELECT * FROM CarAnnonce";
+        $req = "SELECT * FROM Cars";
         return $this->executeAndFetchAll($req);
     }
 

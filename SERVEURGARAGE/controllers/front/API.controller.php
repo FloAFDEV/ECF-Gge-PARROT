@@ -14,101 +14,181 @@ class APIController
     }
 
     // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
-    private function displayData($datas)
+    // private function displayData($datas)
+    // {
+    //     echo "<pre>";
+    //     print_r($datas);
+    //     echo "</pre>";
+    // }
+
+    public function getAllAnnonces($idAnnonces = null)
     {
-        echo "<pre>";
-        print_r($datas);
-        echo "</pre>";
+        // Récupération des informations via APIManager avec la fonction getAnnonces
+        $linesAnnonces = ($idAnnonces !== null) ? $this->apiManager->getAllAnnonces($idAnnonces) : $this->apiManager->getAllAnnonces();
+        Model::sendJSON($this->formatDataLinesModels($linesAnnonces));
+        // $this->displayData($cars);
+    }
+    public function getAnnonceByID($id)
+    {
+        // Récupération des informations via APIManager avec la fonction getAnnonces
+        $annonce = $this->apiManager->getAnnonceByID($id);
+        Model::sendJSON($this->formatDataLinesModels($annonce));
+        // $this->displayData($annonce);
     }
 
-    public function getCars()
+    private function formatDataLinesModels($lines)
     {
-        // je récupère toutes les informations via APIManager avec la fonction getDBCars
-        $cars = $this->apiManager->getDBCars();
-        $this->displayData($cars);
+        $formatted_data = [];
+
+        foreach ($lines as $line) {
+            // Génére les clés pour l'annonce en fonction des identifiants uniques
+            $annonce_key_id = "Voiture n° " . $line["Id_Cars"];
+            $annonce_key_title = "Titre annonce " . $line["annonce_title"];
+
+            // Vérifie si la clé d'annonce existe déjà dans les données formatées
+            if (!isset($formatted_data[$annonce_key_id])) {
+                // Sinon, crée une nouvelle entrée avec les informations du garage, de l'annonce, de la voiture et des options
+                $formatted_data[$annonce_key_id] = [
+                    "info_annonce" => [
+                        $annonce_key_title => [
+                            "nom du garage" => $line["annonce_garageName"],
+                            "titre de l'annonce" => $line["annonce_title"],
+                            "Id_CarAnnonce" => $line["Id_CarAnnonce"],
+                            "date_creation_annonce" => $line["annonce_createdAt"],
+                        ],
+                        "options" => [], // Initialise le tableau des options
+                    ],
+                    "info_voiture" => [
+                        "Id_CarAnnonce" => $line["Id_CarAnnonce"],
+                        "modele" => $line["brand_name"] . ' ' . $line["model_name"],
+                        "annee_fabrication" => $line["manufacture_year"],
+                        "type_carburant" => $line["fuel_type"],
+                        "kilometrage" => $line["mileage"] . ' km',
+                        "categorie" => $line["category_model"],
+                        "description" => $line["description"],
+                        "image_principale" => $line["main_image_url"],
+                        "puissance" => $line["power"] . ' ' . $line["power_unit"],
+                        "couleur" => $line["color"],
+                        "prix" => number_format($line["price"], 0, '', '') . ' €', // Formaterle prix sans décimales
+                        "options" => [], // Initialise le tableau des options
+                    ],
+                ];
+            }
+            // Vérifie si des options existent avant de les utiliser
+            if (isset($line["options_name"]) && $line["options_name"] !== null) {
+                // Ajoute chaque option à la liste des options pour cette voiture
+                $options = explode(',', $line["options_name"]);
+                // Ajoute les options à la liste existante sans vérifier les doublons
+                $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_merge(
+                    $formatted_data[$annonce_key_id]["info_voiture"]["options"],
+                    $options
+                );
+                // Supprime les doublons
+                $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_unique($formatted_data[$annonce_key_id]["info_voiture"]["options"]);
+            }
+        }
+        return $formatted_data;
     }
 
-    public function getModels($idModels)
-    { // je récupère toutes les informations via APIManager avec la fonction getDBModels
-        $models = $this->apiManager->getDBModels($idModels);
-        $this->displayData($models);
+
+
+    public function getModels()
+    { // Récupération des informations via APIManager avec la fonction getDBModels
+        $models = $this->apiManager->getDBModels();
+        $tabResultat = $this->formatDataLinesModels($models);
+        Model::sendJSON($tabResultat);
+        // $this->displayData($models);
     }
 
     public function getBrands()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBBrands
-        $brands = $this->apiManager->getDBBrands();
-        $this->displayData($brands);
+    { // Récupération des informations via APIManager avec la fonction getDBBrands
+        $brands = $this->apiManager->getDBModels();
+        $tabResultat = $this->formatDataLinesModels($brands);
+        Model::sendJSON($tabResultat);
+        // $this->displayData($brands);
     }
 
     public function getGarage()
-    { // je récupère toutes les informations via APIManager avec la fonction getGarage
+    { // Récupération des informations via APIManager avec la fonction getGarage
         $garage = $this->apiManager->getDBGarage();
-        $this->displayData($garage);
+        Model::sendJSON($garage);
+        // $this->displayData($garage);
     }
 
     public function getImages()
-    { // je récupère toutes les informations via APIManager avec la fonction getImages
+    { // Récupération des informations via APIManager avec la fonction getImages
         $images = $this->apiManager->getDBImages();
-        $this->displayData($images);
+        Model::sendJSON($images);
+        // $this->displayData($images);
     }
 
     public function getTestimonials()
-    { // je récupère toutes les informations via APIManager avec la fonction getTestimonials
+    { // Récupération des informations via APIManager avec la fonction getTestimonials
         $testimonials = $this->apiManager->getDBTestimonials();
-        $this->displayData($testimonials);
+        Model::sendJSON($testimonials);
+        // $this->displayData($testimonials);
     }
 
     public function getOpening()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBOpening
+    { // Récupération des informations via APIManager avec la fonction getDBOpening
         $opening = $this->apiManager->getDBOpening();
-        $this->displayData($opening);
+        Model::sendJSON($opening);
+        // $this->displayData($opening);
     }
 
     public function getGarageServices()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBGarageServices
+    { // Récupération des informations via APIManager avec la fonction getDBGarageServices
         $services = $this->apiManager->getDBGarageServices();
-        $this->displayData($services);
+        Model::sendJSON($services);
+        // $this->displayData($services);
     }
 
     public function getOptions()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBOptions
-        $idoptions = $this->apiManager->getDBOptions();
-        $this->displayData($idoptions);
+    { // Récupération des informations via APIManager avec la fonction getDBOptions
+        $options = $this->apiManager->getDBOptions();
+        Model::sendJSON($options);
+        // $this->displayData($idoptions);
     }
 
     public function getManufactureYears()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBManufactureYears
+    { // Récupération des informations via APIManager avec la fonction getDBManufactureYears
         $manufactureYears = $this->apiManager->getDBManufactureYears();
-        $this->displayData($manufactureYears);
+        Model::sendJSON($manufactureYears);
+        // $this->displayData($manufactureYears);
     }
 
     public function getEnergyType()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBEnergyType
+    { // Récupération des informations via APIManager avec la fonction getDBEnergyType
         $energyType = $this->apiManager->getDBEnergyType();
-        $this->displayData($energyType);
+        Model::sendJSON($energyType);
+        // $this->displayData($energyType);
     }
 
-    public function getCarAnnonce()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBCarAnnonce
-        $carAnnonce = $this->apiManager->getDBidCarAnnonce();
-        $this->displayData($carAnnonce);
+    public function getCars()
+    { // Récupération des informations via APIManager avec la fonction getDBCarAnnonce
+        $annonce = $this->apiManager->getDBCars();
+        Model::sendJSON($annonce);
+        // $this->displayData($carAnnonce);
     }
 
     public function getMessage()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBMessage
+    { // Récupération des informations via APIManager avec la fonction getDBMessage
         $message = $this->apiManager->getDBMessage();
-        $this->displayData($message);
+        Model::sendJSON($message);
+        // $this->displayData($message);
     }
 
     public function getResetPassword()
-    { // je récupère toutes les informations via APIManager avec la fonction getDBResetPassword
-        $resetPassword = $this->apiManager->getDBResetPassword();
-        $this->displayData($resetPassword);
+    { // Récupération des informations via APIManager avec la fonction getDBResetPassword
+        $password = $this->apiManager->getDBResetPassword();
+        Model::sendJSON($password);
+        // $this->displayData($resetPassword);
     }
 
     public function getUsers()
     {
         $users = $this->apiManager->getDBUsers();
-        $this->displayData($users);
+        Model::sendJSON($users);
+        // $this->displayData($users);
     }
 }
