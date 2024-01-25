@@ -118,7 +118,7 @@ class APIManager extends Model
     LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
     LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
     LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
-    WHERE Cars.Id_Cars = :id
+    WHERE CarAnnonce.Id_CarAnnonce = :id
         GROUP BY
         Cars.Id_Cars,
         Cars.mileage,
