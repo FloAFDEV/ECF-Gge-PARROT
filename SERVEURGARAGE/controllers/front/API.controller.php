@@ -46,17 +46,20 @@ class APIController
             $annonce_key_title = "Titre annonce " . $line["annonce_title"];
 
             // Vérifie si la clé d'annonce existe déjà dans les données formatées
-            if (!isset($formatted_data[$annonce_key_id])) {
+            if (
+                !array_key_exists($annonce_key_id, $formatted_data) ||
+                !array_key_exists($annonce_key_title, $formatted_data[$annonce_key_id]["info_annonce"])
+            ) {
                 // Sinon, crée une nouvelle entrée avec les informations du garage, de l'annonce, de la voiture et des options
                 $formatted_data[$annonce_key_id] = [
                     "info_annonce" => [
                         $annonce_key_title => [
                             "nom du garage" => $line["annonce_garageName"],
                             "titre de l'annonce" => $line["annonce_title"],
-                            "Id_CarAnnonce" => $line["Id_CarAnnonce"],
+                            "Id_Car" => $line["Id_Cars"],
                             "date_creation_annonce" => $line["annonce_createdAt"],
+                            "validation_annonce" => $line["annonce_valid"] ?? null,
                         ],
-                        "options" => [], // Initialise le tableau des options
                     ],
                     "info_voiture" => [
                         "Id_CarAnnonce" => $line["Id_CarAnnonce"],
@@ -93,18 +96,16 @@ class APIController
 
 
     public function getModels()
-    { // Récupération des informations via APIManager avec la fonction getDBModels
+    { // Récupération des informations via APIManager avec la fonction getModels
         $models = $this->apiManager->getDBModels();
-        $tabResultat = $this->formatDataLinesModels($models);
-        Model::sendJSON($tabResultat);
+        Model::sendJSON($models);
         // $this->displayData($models);
     }
 
     public function getBrands()
-    { // Récupération des informations via APIManager avec la fonction getDBBrands
-        $brands = $this->apiManager->getDBModels();
-        $tabResultat = $this->formatDataLinesModels($brands);
-        Model::sendJSON($tabResultat);
+    { // Récupération des informations via APIManager avec la fonction getBrands
+        $brands = $this->apiManager->getDBBrands();
+        Model::sendJSON($brands);
         // $this->displayData($brands);
     }
 
@@ -130,7 +131,7 @@ class APIController
     }
 
     public function getOpening()
-    { // Récupération des informations via APIManager avec la fonction getDBOpening
+    { // Récupération des informations via APIManager avec la fonction getOpening
         $opening = $this->apiManager->getDBOpening();
         Model::sendJSON($opening);
         // $this->displayData($opening);
@@ -144,42 +145,42 @@ class APIController
     }
 
     public function getOptions()
-    { // Récupération des informations via APIManager avec la fonction getDBOptions
+    { // Récupération des informations via APIManager avec la fonction getOptions
         $options = $this->apiManager->getDBOptions();
         Model::sendJSON($options);
         // $this->displayData($idoptions);
     }
 
     public function getManufactureYears()
-    { // Récupération des informations via APIManager avec la fonction getDBManufactureYears
+    { // Récupération des informations via APIManager avec la fonction getManufactureYears
         $manufactureYears = $this->apiManager->getDBManufactureYears();
         Model::sendJSON($manufactureYears);
         // $this->displayData($manufactureYears);
     }
 
     public function getEnergyType()
-    { // Récupération des informations via APIManager avec la fonction getDBEnergyType
-        $energyType = $this->apiManager->getDBEnergyType();
-        Model::sendJSON($energyType);
+    { // Récupération des informations via APIManager avec la fonction getEnergyType
+        $energy = $this->apiManager->getDBEnergyType();
+        Model::sendJSON($energy);
         // $this->displayData($energyType);
     }
 
     public function getCars()
-    { // Récupération des informations via APIManager avec la fonction getDBCarAnnonce
+    { // Récupération des informations via APIManager avec la fonction getCarAnnonce
         $annonce = $this->apiManager->getDBCars();
         Model::sendJSON($annonce);
         // $this->displayData($carAnnonce);
     }
 
     public function getMessage()
-    { // Récupération des informations via APIManager avec la fonction getDBMessage
+    { // Récupération des informations via APIManager avec la fonction getMessage
         $message = $this->apiManager->getDBMessage();
         Model::sendJSON($message);
         // $this->displayData($message);
     }
 
     public function getResetPassword()
-    { // Récupération des informations via APIManager avec la fonction getDBResetPassword
+    { // Récupération des informations via APIManager avec la fonction getResetPassword
         $password = $this->apiManager->getDBResetPassword();
         Model::sendJSON($password);
         // $this->displayData($resetPassword);

@@ -307,6 +307,11 @@ VALUES
 ('Annonce 6', '2023-07-25 16:15:00', TRUE, 1);
 
 
+-- Mise à jour su statu pour l'annonce avec l'ID n°9
+UPDATE CarAnnonce SET valid = 0 WHERE Id_CarAnnonce = 9;
+
+
+
 -- Dans Cars
 INSERT INTO Cars (mileage, registration, price, description, main_image_url, Id_CarAnnonce)
 VALUES
@@ -333,13 +338,13 @@ INSERT INTO Options (options_name)
 VALUES ('Fermeture centralisée'),
        ('Boîte manuelle'),
        ('Boîte automatique'),
-       ('Coupé'),
-       ('Blanc'),
-       ('Noir'),
-       ('Argent'),
-       ('Bleu'),
-       ('Rouge'),
-       ('Marron'),
+       ('Caméra de recul'),
+       ('Détecteurs d\'angle mort'),
+       ('Régulateur de vitesse adaptatif'),
+       ('Système de freinage d\'urgence'),
+       ('Assistance au stationnement'),
+       ('Connexion Bluetooth'),
+       ('Phares à LED ou Xenon'),
        ('Climatisation automatique'),
        ('Système audio'),
        ('Toit ouvrant'),
@@ -848,6 +853,7 @@ SELECT
         CarAnnonce.Id_CarAnnonce,
         CarAnnonce.title AS annonce_title,
         CarAnnonce.createdAt AS annonce_createdAt,
+        CarAnnonce.valid AS annonce_valid,
         Garage.garageName AS annonce_garageName,
         Cars.power,
         Cars.power_unit,

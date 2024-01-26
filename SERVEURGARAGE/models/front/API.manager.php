@@ -20,9 +20,13 @@ class APIManager extends Model
             Cars.price,
             Cars.description,
             Cars.main_image_url,
+            Cars.power,
+            Cars.power_unit,
+            Cars.color,
             CarAnnonce.Id_CarAnnonce,
             CarAnnonce.title AS annonce_title,
             CarAnnonce.createdAt AS annonce_createdAt,
+            CarAnnonce.valid AS annonce_valid,
             Garage.garageName AS annonce_garageName,
             Cars.power,
             Cars.power_unit,
@@ -53,6 +57,9 @@ class APIManager extends Model
             Cars.price,
             Cars.description,
             Cars.main_image_url,
+            Cars.power,
+            Cars.power_unit,
+            Cars.color,
             CarAnnonce.Id_CarAnnonce,
             CarAnnonce.title,
             CarAnnonce.createdAt,
@@ -95,6 +102,7 @@ class APIManager extends Model
         CarAnnonce.Id_CarAnnonce,
         CarAnnonce.title AS annonce_title,
         CarAnnonce.createdAt AS annonce_createdAt,
+        CarAnnonce.valid AS annonce_valid,
         Garage.garageName AS annonce_garageName,
         Cars.power,
         Cars.power_unit,
@@ -167,61 +175,10 @@ class APIManager extends Model
     public function getDBModels()
     {
         //requête pour Models
-        $req = "SELECT
-        Cars.*,
-        Models.model_name,
-        Models.category_model,
-        Brands.brand_name,
-        Brands.brand_logo_url,
-        ManufactureYears.manufacture_year,
-        EnergyType.fuel_type,
-        Cars.power,
-        Cars.power_unit,
-        Cars.color,
-        CarAnnonce.title AS annonce_title,
-        CarAnnonce.createdAt AS annonce_createdAt,
-        Garage.garageName AS annonce_garageName,
-        GROUP_CONCAT(Options.options_name) AS options_name
-    FROM
-        Cars
-        INNER JOIN Models ON Cars.Id_Cars = Models.Id_Cars
-    INNER JOIN Brands ON Models.Id_Brand = Brands.Id_Brand
-    INNER JOIN ModelsManufactureYears ON Models.Id_Model = ModelsManufactureYears.Id_Model
-    INNER JOIN ManufactureYears ON ModelsManufactureYears.Id_ManufactureYears = ManufactureYears.Id_ManufactureYears
-    INNER JOIN CarsEnergy ON Cars.Id_Cars = CarsEnergy.Id_Cars
-    INNER JOIN EnergyType ON CarsEnergy.Id_EnergyType = EnergyType.Id_EnergyType
-    LEFT JOIN CarAnnonce ON Cars.Id_CarAnnonce = CarAnnonce.Id_CarAnnonce
-    LEFT JOIN Garage ON CarAnnonce.Id_Garage = Garage.Id_Garage
-    LEFT JOIN CarsOptions ON Cars.Id_Cars = CarsOptions.Id_Cars
-    LEFT JOIN Options ON CarsOptions.Id_Options = Options.Id_Options
-    GROUP BY
-        Cars.Id_Cars,
-        Cars.mileage,
-        Cars.registration,
-        Cars.price,
-        Cars.description,
-        Cars.main_image_url,
-        CarAnnonce.Id_CarAnnonce,
-        CarAnnonce.title,
-        CarAnnonce.createdAt,
-        Garage.garageName,
-        Cars.power,
-        Cars.power_unit,
-        Cars.color,
-        Models.model_name,
-        Models.category_model,
-        Brands.brand_name,
-        Brands.brand_logo_url,
-        ManufactureYears.manufacture_year,
-        EnergyType.fuel_type
-    ";
+        $req = "SELECT * FROM Models";
 
         //je prépare la requête dans le statement
         $stmt = $this->getBdd()->prepare($req);
-
-        // Je type les données avec PDO::PARAM_INT
-        // $stmt->bindValue(":idModels", $idModels, PDO::PARAM_INT);
-
         // Je lance son execution
         $stmt->execute();
         // Je récupère les données
