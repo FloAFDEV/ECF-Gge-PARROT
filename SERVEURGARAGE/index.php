@@ -18,7 +18,7 @@ try {
         $allowedActions = [
             "cars", "models", "brands", "garage", "images",
             "testimonials", "opening", "services", "options",
-            "manufactureYears", "energy", "annonces",
+            "annee", "energy", "annonces",
             "users", "message", "password"
         ];
 
@@ -65,7 +65,7 @@ try {
                     case "options":
                         $apiController->getOptions();
                         break;
-                    case "manufactureYears":
+                    case "annee":
                         $apiController->getManufactureYears();
                         break;
                     case "energy":
@@ -91,7 +91,7 @@ try {
                 echo "page back demandée";
                 break;
             default:
-                throw new Exception("La page n'éxiste pas");
+                throw new Exception("La page demandée n'éxiste pas");
         }
     }
 } catch (Exception $e) {
