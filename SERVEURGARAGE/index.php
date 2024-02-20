@@ -4,7 +4,7 @@ define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" :
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
-require_once "controllers/front/API.controller.php";
+require_once "controllers/API.controller.php";
 $apiController = new APIController();
 
 try {
@@ -27,7 +27,7 @@ try {
         }
 
         switch ($url[0]) {
-            case "front":
+            case "backend":
                 switch ($url[1]) {
                     case "annonces":
                         if (isset($url[2]) && is_numeric($url[2])) {

@@ -1,5 +1,5 @@
 <?php
-require_once "models/front/API.manager.php";
+require_once "models/API.manager.php";
 require_once "models/Model.php";
 
 // méthodes
@@ -25,73 +25,73 @@ class APIController
     {
         // Récupération des informations via APIManager avec la fonction getAnnonces
         $linesAnnonces = ($idAnnonces !== null) ? $this->apiManager->getAllAnnonces($idAnnonces) : $this->apiManager->getAllAnnonces();
-        Model::sendJSON($this->formatDataLinesModels($linesAnnonces));
+        Model::sendJSON(($linesAnnonces));
         // $this->displayData($cars);
     }
     public function getAnnonceByID($id)
     {
         // Récupération des informations via APIManager avec la fonction getAnnonces
         $annonce = $this->apiManager->getAnnonceByID($id);
-        Model::sendJSON($this->formatDataLinesModels($annonce));
+        Model::sendJSON(($annonce));
         // $this->displayData($annonce);
     }
 
-    private function formatDataLinesModels($lines)
-    {
-        $formatted_data = [];
+    // private function formatDataLinesModels($lines)
+    // {
+    //     $formatted_data = [];
 
-        foreach ($lines as $line) {
-            // Génére les clés pour l'annonce en fonction des identifiants uniques
-            $annonce_key_id = "Voiture n° " . $line["Id_Cars"];
-            $annonce_key_title = "Titre annonce " . $line["annonce_title"];
+    //     foreach ($lines as $line) {
+    //         // Génére les clés pour l'annonce en fonction des identifiants uniques
+    //         $annonce_key_id = "Voiture n° " . $line["Id_Cars"];
+    //         $annonce_key_title = "Titre annonce " . $line["annonce_title"];
 
-            // Vérifie si la clé d'annonce existe déjà dans les données formatées
-            if (
-                !array_key_exists($annonce_key_id, $formatted_data) ||
-                !array_key_exists($annonce_key_title, $formatted_data[$annonce_key_id]["info_annonce"])
-            ) {
-                // Sinon, crée une nouvelle entrée avec les informations du garage, de l'annonce, de la voiture et des options
-                $formatted_data[$annonce_key_id] = [
-                    "info_annonce" => [
-                        $annonce_key_title => [
-                            "nom du garage" => $line["annonce_garageName"],
-                            "titre de l'annonce" => $line["annonce_title"],
-                            "Id_Car" => $line["Id_Cars"],
-                            "date_creation_annonce" => $line["annonce_createdAt"],
-                            "validation_annonce" => $line["annonce_valid"] ?? null,
-                        ],
-                    ],
-                    "info_voiture" => [
-                        "Id_CarAnnonce" => $line["Id_CarAnnonce"],
-                        "modele" => $line["brand_name"] . ' ' . $line["model_name"],
-                        "annee_fabrication" => $line["manufacture_year"],
-                        "type_carburant" => $line["fuel_type"],
-                        "kilometrage" => $line["mileage"] . ' km',
-                        "categorie" => $line["category_model"],
-                        "description" => $line["description"],
-                        "image_principale" => $line["main_image_url"],
-                        "puissance" => $line["power"] . ' ' . $line["power_unit"],
-                        "couleur" => $line["color"],
-                        "prix" => number_format($line["price"], 0, '', '') . ' €', // Formaterle prix sans décimales
-                        "options" => [], // Initialise le tableau des options
-                    ],
-                ];
-            }
-            // Vérifie si des options existent avant de les utiliser
-            if (isset($line["options_name"]) && $line["options_name"] !== null) {
-                // Ajoute chaque option à la liste des options pour cette voiture
-                $options = explode(',', $line["options_name"]);
-                // Ajoute les options à la liste existante sans vérifier les doublons
-                $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_merge(
-                    $formatted_data[$annonce_key_id]["info_voiture"]["options"],
-                    $options
-                );
-                // Supprime les doublons
-                $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_unique($formatted_data[$annonce_key_id]["info_voiture"]["options"]);
-            }
-        }
-        return $formatted_data;
-    }
+    //         // Vérifie si la clé d'annonce existe déjà dans les données formatées
+    //         if (
+    //             !array_key_exists($annonce_key_id, $formatted_data) ||
+    //             !array_key_exists($annonce_key_title, $formatted_data[$annonce_key_id]["info_annonce"])
+    //         ) {
+    //             // Sinon, crée une nouvelle entrée avec les informations du garage, de l'annonce, de la voiture et des options
+    //             $formatted_data[$annonce_key_id] = [
+    //                 "info_annonce" => [
+    //                     $annonce_key_title => [
+    //                         "nom du garage" => $line["annonce_garageName"],
+    //                         "titre de l'annonce" => $line["annonce_title"],
+    //                         "Id_Car" => $line["Id_Cars"],
+    //                         "date_creation_annonce" => $line["annonce_createdAt"],
+    //                         "validation_annonce" => $line["annonce_valid"] ?? null,
+    //                     ],
+    //                 ],
+    //                 "info_voiture" => [
+    //                     "Id_CarAnnonce" => $line["Id_CarAnnonce"],
+    //                     "modele" => $line["brand_name"] . ' ' . $line["model_name"],
+    //                     "annee_fabrication" => $line["manufacture_year"],
+    //                     "type_carburant" => $line["fuel_type"],
+    //                     "kilometrage" => $line["mileage"] . ' km',
+    //                     "categorie" => $line["category_model"],
+    //                     "description" => $line["description"],
+    //                     "image_principale" => $line["main_image_url"],
+    //                     "puissance" => $line["power"] . ' ' . $line["power_unit"],
+    //                     "couleur" => $line["color"],
+    //                     "prix" => number_format($line["price"], 0, '', '') . ' €', // Formaterle prix sans décimales
+    //                     "options" => [], // Initialise le tableau des options
+    //                 ],
+    //             ];
+    //         }
+    //         // Vérifie si des options existent avant de les utiliser
+    //         if (isset($line["options_name"]) && $line["options_name"] !== null) {
+    //             // Ajoute chaque option à la liste des options pour cette voiture
+    //             $options = explode(',', $line["options_name"]);
+    //             // Ajoute les options à la liste existante sans vérifier les doublons
+    //             $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_merge(
+    //                 $formatted_data[$annonce_key_id]["info_voiture"]["options"],
+    //                 $options
+    //             );
+    //             // Supprime les doublons
+    //             $formatted_data[$annonce_key_id]["info_voiture"]["options"] = array_unique($formatted_data[$annonce_key_id]["info_voiture"]["options"]);
+    //         }
+    //     }
+    //     return $formatted_data;
+    // }
 
 
 
