@@ -18,7 +18,7 @@ try {
         $allowedActions = [
             "cars", "models", "brands", "garage", "images",
             "testimonials", "opening", "services", "options",
-            "annee", "energy", "annonces",
+            "years", "energy", "annonces",
             "users", "message", "password"
         ];
 
@@ -65,7 +65,7 @@ try {
                     case "options":
                         $apiController->getOptions();
                         break;
-                    case "annee":
+                    case "years":
                         $apiController->getManufactureYears();
                         break;
                     case "energy":

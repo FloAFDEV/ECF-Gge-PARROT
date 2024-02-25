@@ -1,3 +1,5 @@
 
-3php:S125*"Remove this commented out code.(åÊäÁ
-Dphp:S121"0Add curly braces around the nested statement(s).(çûÒ¿
+|	php:S1192"`Define a constant instead of duplicating this literal "La page demandÃ©e n'Ã©xiste pas" 3 times.(¨ºÉ¸8ÔÉµÄÜ1
+=	php:S11160"Remove this empty statement.(ÑÏ¦øÿÿÿÿ8ÛÉµÄÜ1
+Dphp:S121"0Add curly braces around the nested statement(s).(çûÒ¿
+r	php:S4833"QReplace "require_once" with namespace import mechanism through the "use" keyword.(ÎÙåüÿÿÿÿ8İÉµÄÜ1
