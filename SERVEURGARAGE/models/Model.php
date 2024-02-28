@@ -9,13 +9,17 @@ $config['development'] = [
 ];
 
 $config['production'] = [
-    $dns => getenv('DATABASE_DNS'),
-    $dbname => getenv('DATABASE_NAME'),
-    $user => getenv('DATABASE_USER'),
-    $password => getenv('DATABASE_PASSWORD')
-
-
+    'DB_HOST' => getenv('DATABASE_DNS'),
+    'DB_DATABASE' => getenv('DATABASE_NAME'),
+    'DB_USERNAME' => getenv('DATABASE_USER'),
+    'DB_PASSWORD' => getenv('DATABASE_PASSWORD')
 ];
+
+
+$env = getenv('APP_ENV');
+$dbConfig = ($env === 'prod') ? $config['production'] : $config['development'];
+
+
 // Déclaration de ma classe abstraite (càd jamais instenciable)
 abstract class Model
 {
@@ -24,8 +28,13 @@ abstract class Model
 
     private static function setBdd()
     {
+        global $dbConfig;
+        $dns = 'mysql:host=' . $dbConfig['DB_HOST'] . ';dbname=' . $dbConfig['DB_DATABASE'] . ';charset=utf8';
+        $user = $dbConfig['DB_USERNAME'];
+        $password = $dbConfig['DB_PASSWORD'];
+
         // Connexion à la base de données
-        self::$pdo = new PDO("mysql:host=localhost;dbname=DBGarageParrot;charset=utf8", "root", "root");
+        self::$pdo = new PDO($dns, $user, $password);
         self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     }
 
