@@ -1,7 +1,22 @@
+
+
 <?php
+$config['development'] = [
+    'DB_HOST' => 'localhost',
+    'DB_DATABASE' => 'DBGarageParrot',
+    'DB_USERNAME' => 'root',
+    'DB_PASSWORD' => 'root'
+];
 
+$config['production'] = [
+    $dns => getenv('DATABASE_DNS'),
+    $dbname => getenv('DATABASE_NAME'),
+    $user => getenv('DATABASE_USER'),
+    $password => getenv('DATABASE_PASSWORD')
+
+
+];
 // Déclaration de ma classe abstraite (càd jamais instenciable)
-
 abstract class Model
 {
     // je veux créer une instance de PDO unique
