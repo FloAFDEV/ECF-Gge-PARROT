@@ -1,6 +1,14 @@
-    RewriteEngine On
+RewriteEngine On
 
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+# Autoriser l'accès depuis toutes les origines
+Header set Access-Control-Allow-Origin "*"
 
-    RewriteRule ^(.*)$ index.php?page=$1
+# Autoriser les méthodes HTTP spécifiques
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+
+# Autoriser certains en-têtes personnalisés
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
