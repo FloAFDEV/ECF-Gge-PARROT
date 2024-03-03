@@ -1,6 +1,17 @@
 <?php
-define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
-    "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
+
+// Charger les variables d'environnement
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        list($name, $value) = explode('=', $line, 2);
+        $_ENV[trim($name)] = trim($value);
+    }
+}
+
+// Définir l'URL de base
+define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
@@ -95,6 +106,7 @@ try {
         }
     }
 } catch (Exception $e) {
+    // Gérer les erreurs et renvoyer une réponse JSON
     $error = [
         'error' => $e->getMessage(),
     ];
