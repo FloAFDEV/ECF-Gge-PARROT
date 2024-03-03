@@ -1,15 +1,15 @@
 RewriteEngine On
 
-# Autoriser l'accès depuis toutes les origines
-Header set Access-Control-Allow-Origin "*"
-
-# Autoriser les méthodes HTTP spécifiques
-Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-
-# Autoriser certains en-têtes personnalisés
-Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
-
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+
+# Activer les en-têtes CORS
+<IfModule mod_headers.c>
+    SetEnvIf Origin "^(.*)$" ORIGIN_SUB_DOMAIN=$1
+    Header set Access-Control-Allow-Origin "%{ORIGIN_SUB_DOMAIN}e" env=ORIGIN_SUB_DOMAIN
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Authorization, Content-Type"
+    Header always set Access-Control-Allow-Credentials "true"
+</IfModule>
 

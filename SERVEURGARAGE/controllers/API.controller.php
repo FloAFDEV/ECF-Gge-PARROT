@@ -11,6 +11,12 @@ class APIController
     {
         //J'instancie l'apiManager
         $this->apiManager = new APIManager();
+        // Autoriser l'accès depuis toutes les origines
+        header("Access-Control-Allow-Origin: *");
+        // Autoriser les méthodes HTTP spécifiques
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        // Autoriser les en-têtes HTTP spécifiques
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");
     }
 
     // Mise en place d'une méthode commune pour l'affichage des données sans redondance (DRY)
