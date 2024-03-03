@@ -12,3 +12,4 @@ Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+

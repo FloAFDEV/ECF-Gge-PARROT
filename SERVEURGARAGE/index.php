@@ -10,12 +10,11 @@ if (file_exists($envFile)) {
     }
 }
 
-// Définir l'URL de base
-define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
+define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
+    "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
-// Inclure le contrôleur de l'API
 require_once "controllers/API.controller.php";
 $apiController = new APIController();
 
@@ -38,18 +37,8 @@ try {
             throw new Exception("Oups cette action n'éxiste pas");
         }
 
-        // Configuration de la base de données
-        $dbConfig = [
-            'DB_HOST' => $_ENV['DATABASE_DNS'],
-            'DB_DATABASE' => $_ENV['DB_NAME'],
-            'DB_USERNAME' => $_ENV['DATABASE_USER'],
-            'DB_PASSWORD' => $_ENV['DATABASE_PASSWORD']
-        ];
-
-        // Router les requêtes vers les actions appropriées
         switch ($url[0]) {
             case "backend":
-                // Appeler la méthode appropriée du contrôleur de l'API en lui passant les informations de configuration de la base de données
                 switch ($url[1]) {
                     case "annonces":
                         if (isset($url[2]) && is_numeric($url[2])) {
