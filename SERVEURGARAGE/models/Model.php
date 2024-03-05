@@ -1,34 +1,19 @@
 <?php
 
+require_once "config.php";
 
-$config['development'] = [
-    'DB_HOST' => 'localhost',
-    'DB_DATABASE' => 'DBGarageParrot',
-    'DB_USERNAME' => 'root',
-    'DB_PASSWORD' => 'root'
-];
-
-$config['production'] = [
-    'DB_HOST' => getenv('DATABASE_DNS'),
-    'DB_DATABASE' => getenv('DATABASE_NAME'),
-    'DB_USERNAME' => getenv('DATABASE_USER'),
-    'DB_PASSWORD' => getenv('DATABASE_PASSWORD')
-];
-
-
-$env = getenv('APP_ENV');
-$dbConfig = ($env === 'prod') ? $config['production'] : $config['development'];
-
-
-// Déclaration de ma classe abstraite (càd jamais instenciable)
+// Déclaration de ma classe abstraite (càd jamais instanciable)
 abstract class Model
 {
-    // je veux créer une instance de PDO unique
+    // Je veux créer une instance de PDO unique
     private static $pdo;
 
-    private static function setBdd()
+    private static function setBdd($dbConfig)
     {
-        global $dbConfig;
+        if (!isset($dbConfig['DB_HOST']) || !isset($dbConfig['DB_DATABASE']) || !isset($dbConfig['DB_USERNAME']) || !isset($dbConfig['DB_PASSWORD'])) {
+            throw new Exception("Configuration de la base de données manquante.");
+        }
+
         $dns = 'mysql:host=' . $dbConfig['DB_HOST'] . ';dbname=' . $dbConfig['DB_DATABASE'] . ';charset=utf8';
         $user = $dbConfig['DB_USERNAME'];
         $password = $dbConfig['DB_PASSWORD'];
@@ -42,11 +27,12 @@ abstract class Model
     {
         // On vérifie si l'instance de PDO existe
         if (self::$pdo === null) {
-            self::setBdd();
+            self::setBdd($GLOBALS['dbConfig']); // Passer les informations de configuration de la base de données
         }
         return self::$pdo;
     }
-    // fonction statique appelable de n'importe où à partir de la classe "model" qui converti les informations en format JSON
+
+    // Fonction statique appelable de n'importe où à partir de la classe "Model" qui convertit les informations en format JSON
     public static function sendJSON($info)
     {
         header("Access-Control-Allow-Origin: *");

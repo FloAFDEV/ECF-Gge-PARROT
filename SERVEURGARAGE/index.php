@@ -1,20 +1,13 @@
 <?php
 
 require_once "controllers/API.controller.php";
+require_once "models/Model.php";
 
 
-// Charger les variables d'environnement
-$envFile = __DIR__ . '/.env';
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        list($name, $value) = explode('=', $line, 2);
-        $_ENV[trim($name)] = trim($value);
-    }
-}
 
 define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
     "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
+
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
@@ -58,7 +51,7 @@ try {
                         $apiController->getModels();
                         break;
                     case "brands":
-                        $apiController->getBrands();;
+                        $apiController->getBrands();
                         break;
                     case "garage":
                         $apiController->getGarage();
