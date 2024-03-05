@@ -1,6 +1,6 @@
-
-
 <?php
+
+
 $config['development'] = [
     'DB_HOST' => 'localhost',
     'DB_DATABASE' => 'DBGarageParrot',

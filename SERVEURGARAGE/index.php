@@ -1,5 +1,8 @@
 <?php
 
+require_once "controllers/API.controller.php";
+
+
 // Charger les variables d'environnement
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {
@@ -15,9 +18,8 @@ define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" :
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
-require_once "controllers/API.controller.php";
-$apiController = new APIController();
 
+$apiController = new APIController();
 try {
     if (empty($_GET['page'])) {
         throw new Exception("La page demandée n'éxiste pas");
