@@ -17,19 +17,20 @@ if (file_exists($envFile)) {
 }
 
 // Configuration de la base de données
-$developmentConfig = [
-    'DB_HOST' => getenv('DATABASE_DNS'),
-    'DB_DATABASE' => getenv('DATABASE_NAME'),
-    'DB_USERNAME' => getenv('DATABASE_USER'),
-    'DB_PASSWORD' => getenv('DATABASE_PASSWORD')
-];
-
-$productionConfig = [
-    'DB_HOST' => getenv('DATABASE_DNS'),
-    'DB_DATABASE' => getenv('DATABASE_NAME'),
-    'DB_USERNAME' => getenv('DATABASE_USER'),
-    'DB_PASSWORD' => getenv('DATABASE_PASSWORD')
-];
-
 $env = getenv('APP_ENV');
-$dbConfig = ($env === 'development') ? $developmentConfig : $productionConfig;
+
+if ($env === 'production') {
+    $dbConfig = [
+        'DB_HOST' => getenv('DB_HOST_PROD'),
+        'DB_DATABASE' => getenv('DB_DATABASE_PROD'),
+        'DB_USERNAME' => getenv('DB_USERNAME_PROD'),
+        'DB_PASSWORD' => getenv('DB_PASSWORD_PROD')
+    ];
+} else {
+    $dbConfig = [
+        'DB_HOST' => getenv('DB_HOST_DEV'),
+        'DB_DATABASE' => getenv('DB_DATABASE_DEV'),
+        'DB_USERNAME' => getenv('DB_USERNAME_DEV'),
+        'DB_PASSWORD' => getenv('DB_PASSWORD_DEV')
+    ];
+}

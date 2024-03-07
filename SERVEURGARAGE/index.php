@@ -4,7 +4,7 @@ require_once "controllers/API.controller.php";
 require_once "models/Model.php";
 
 
-
+// On définit une constante pour stocker l'URL de base de notre site
 define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
     "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
 
@@ -13,10 +13,14 @@ define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" :
 
 
 $apiController = new APIController();
+
+
 try {
     if (empty($_GET['page'])) {
         throw new Exception("La page demandée n'éxiste pas");
     } else {
+        header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
         $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
         if (!isset($url[0]) || !isset($url[1]))
             throw new Exception("La page demandée n'éxiste pas");
@@ -25,15 +29,14 @@ try {
             "cars", "models", "brands", "garage", "images",
             "testimonials", "opening", "services", "options",
             "years", "energy", "annonces",
-            "users", "message", "password"
+            "users", "message", "password", "login",
         ];
-
         if (!in_array($url[1], $allowedActions)) {
-            throw new Exception("Oups cette action n'éxiste pas");
+            throw new Exception("Oups! cette action n'éxiste pas");
         }
 
         switch ($url[0]) {
-            case "backend":
+            case "api":
                 switch ($url[1]) {
                     case "annonces":
                         if (isset($url[2]) && is_numeric($url[2])) {
@@ -90,11 +93,8 @@ try {
                         $apiController->getResetPassword();
                         break;
                     default:
-                        throw new Exception("Oups cette page n'éxiste pas");
+                        throw new Exception("Oups! cette page n'éxiste pas");
                 }
-                break;
-            case "back":
-                echo "page back demandée";
                 break;
             default:
                 throw new Exception("La page demandée n'éxiste pas");
