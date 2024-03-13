@@ -192,4 +192,14 @@ class APIController
         Model::sendJSON($users);
         // $this->displayData($users);
     }
+
+    public function sendMessage()
+    {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+        header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
+        header("Content-Type: application/json; charset=UTF-8");
+
+        echo json_encode($_POST);
+    }
 }

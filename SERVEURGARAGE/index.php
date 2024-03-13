@@ -92,6 +92,9 @@ try {
                     case "password":
                         $apiController->getResetPassword();
                         break;
+                    case "sendMessage":
+                        $apiController->sendMessage();
+                        break;
                     default:
                         throw new Exception("Oups! cette page n'éxiste pas");
                 }
