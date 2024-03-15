@@ -488,7 +488,10 @@ VALUES
 (156, 2),  
 (157, 2),  
 (158, 3);  
-
+ -- Modifier la table messageAnnonce
+ ALTER TABLE MessageAnnonce 
+MODIFY COLUMN Id_Users INT NULL,
+MODIFY COLUMN Id_CarAnnonce INT NULL;
 
 -- Dans Images
 INSERT INTO Images (image_url, imageName, Id_CarAnnonce)

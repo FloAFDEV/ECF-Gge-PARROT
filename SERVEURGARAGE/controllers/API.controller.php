@@ -193,13 +193,20 @@ class APIController
         // $this->displayData($users);
     }
 
-    public function sendMessage()
+    public function ContactMessage()
     {
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
-        header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
-        header("Content-Type: application/json; charset=UTF-8");
+        header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
 
-        echo json_encode($_POST);
+        $obj = json_decode(file_get_contents('php://input'));
+
+
+        $messageBack = [
+            "from" => $obj->email,
+            "to" => 'contact@vparrot.fr',
+        ];
+
+        echo json_encode($messageBack);
     }
 }

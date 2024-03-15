@@ -28,7 +28,7 @@ try {
         $allowedActions = [
             "cars", "models", "brands", "garage", "images",
             "testimonials", "opening", "services", "options",
-            "years", "energy", "annonces",
+            "years", "energy", "annonces", "contact_message",
             "users", "message", "password", "login",
         ];
         if (!in_array($url[1], $allowedActions)) {
@@ -92,8 +92,8 @@ try {
                     case "password":
                         $apiController->getResetPassword();
                         break;
-                    case "sendMessage":
-                        $apiController->sendMessage();
+                    case "contact_message":
+                        $apiController->ContactMessage();
                         break;
                     default:
                         throw new Exception("Oups! cette page n'éxiste pas");
