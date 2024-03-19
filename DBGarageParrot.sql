@@ -247,6 +247,15 @@ CREATE TABLE ModelsManufactureYears
     FOREIGN KEY (Id_ManufactureYears) REFERENCES ManufactureYears (Id_ManufactureYears)
 ) ENGINE = InnoDB;
 
+-- Création de la table ContactMessage pour stocker les messages de contact
+CREATE TABLE ContactMessage (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 
@@ -554,6 +563,11 @@ INSERT INTO Testimonials (pseudo, userEmail, message, valid, note, createdAt, Id
 VALUES
     ('Chuck Norris', 'chuck@example.com', 'Les témoignages n\'ont pas besoin d\'être validés, ce sont les témoignages qui valident Chuck Norris.', true, 5.0, '2024-01-20 12:34:56', 3),
     ('Néo', 'neo@example.com', 'La cuillère n\'éxiste pas dans ces témoignages, juste la Matrice.', true, 4.5, '2024-01-20 14:45:30', 4);
+
+
+ALTER TABLE MessageAnnonce
+MODIFY COLUMN Id_Users INT NULL;
+
 
 -- Ajout de "power" comme entier
 -- ALTER TABLE Cars ADD COLUMN power INT;

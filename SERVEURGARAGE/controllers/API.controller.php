@@ -2,6 +2,9 @@
 require_once "models/API.manager.php";
 require_once "models/Model.php";
 
+
+
+
 // méthodes
 class APIController
 {
@@ -9,6 +12,10 @@ class APIController
 
     public function __construct()
     {
+        // Définir les en-têtes CORS pour toutes les routes de l'API
+        header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");
         //J'instancie l'apiManager
         $this->apiManager = new APIManager();
     }
@@ -172,16 +179,23 @@ class APIController
         // $this->displayData($carAnnonce);
     }
 
-    public function getMessage()
-    { // Récupération des informations via APIManager avec la fonction getMessage
-        $message = $this->apiManager->getDBMessage();
-        Model::sendJSON($message);
-        // $this->displayData($message);
+    public function getAllMessageAnnonce()
+    { // Appelle la méthode correspondante dans APIManager pour récupérer les messages
+        $messages = $this->apiManager->getDBAllMessageAnnonce();
+        // Envoie les messages au format JSON
+        Model::sendJSON($messages);
     }
 
     public function getResetPassword()
     { // Récupération des informations via APIManager avec la fonction getResetPassword
         $password = $this->apiManager->getDBResetPassword();
+        Model::sendJSON($password);
+        // $this->displayData($resetPassword);
+    }
+
+    public function getContactMessage()
+    { // Récupération des informations via APIManager avec la fonction getResetPassword
+        $password = $this->apiManager->getDBContactMessage();
         Model::sendJSON($password);
         // $this->displayData($resetPassword);
     }
@@ -193,20 +207,55 @@ class APIController
         // $this->displayData($users);
     }
 
-    public function ContactMessage()
+    // Méthode pour insérer un message global
+    public function insertContactMessage()
     {
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
         header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
+        $formData = json_decode(file_get_contents('php://input'));
+        if ($formData === null) {
+            $error = "Aucunes données transmises dans le formulaire";
+            echo json_encode([$error]);
+        } else {
+            try {
+                $result = $this->apiManager->insertContactMessage($formData);
+                if ($result === true) {
+                    $success = "Votre message a bien été envoyé";
+                    echo json_encode([$success]);
+                } else {
+                    $error = "Une erreur est survenue lors de l'envoi de votre message";
+                    echo json_encode([$error]);
+                }
+            } catch (Exception $e) {
+                $error = $e->getMessage();
+                echo json_encode([$error]);
+            }
+        }
+    }
 
-        $obj = json_decode(file_get_contents('php://input'));
-
-
-        $messageBack = [
-            "from" => $obj->email,
-            "to" => 'contact@vparrot.fr',
-        ];
-
-        echo json_encode($messageBack);
+    public function insertMessageAnnonce()
+    {
+        header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
+        $formData = json_decode(file_get_contents('php://input'));
+        if ($formData === null) {
+            http_response_code(400); // Bad Request
+            Model::sendJSON(["error" => "Aucunes données transmises dans le formulaire"]);
+        } else {
+            try {
+                // Utiliser l'instance existante de APIManager
+                $result = $this->apiManager->insertMessageAnnonce($formData);
+                if ($result === true) {
+                    http_response_code(200); // OK
+                    Model::sendJSON(["success" => "Votre message a bien été envoyé"]);
+                } else {
+                    $response = ["error" => "Une erreur est survenue lors de l'envoi de votre message"];
+                    http_response_code(500); // Internal Server Error
+                    Model::sendJSON($response);
+                }
+            } catch (Exception $e) {
+                $response = ["error" => $e->getMessage()];
+                http_response_code(500); // Internal Server Error
+                Model::sendJSON($response);
+            }
+        }
     }
 }

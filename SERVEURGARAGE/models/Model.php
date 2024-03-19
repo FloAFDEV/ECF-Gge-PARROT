@@ -13,11 +13,9 @@ abstract class Model
         if (!isset($dbConfig['DB_HOST']) || !isset($dbConfig['DB_DATABASE']) || !isset($dbConfig['DB_USERNAME']) || !isset($dbConfig['DB_PASSWORD'])) {
             throw new Exception("Configuration de la base de données manquante.");
         }
-
         $dns = 'mysql:host=' . $dbConfig['DB_HOST'] . ';dbname=' . $dbConfig['DB_DATABASE'] . ';charset=utf8';
         $user = $dbConfig['DB_USERNAME'];
         $password = $dbConfig['DB_PASSWORD'];
-
         // Connexion à la base de données
         self::$pdo = new PDO($dns, $user, $password);
         self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

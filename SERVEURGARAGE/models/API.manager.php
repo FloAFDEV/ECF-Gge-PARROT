@@ -218,13 +218,13 @@ class APIManager extends Model
         return $garage;
     }
 
-    // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
-    private function executeAndFetchAll($req)
 
+    // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
+    private function executeAndFetchAll($req, $params = [])
     {
         try {
             $stmt = $this->getBdd()->prepare($req);
-            $stmt->execute();
+            $stmt->execute($params);
             $datas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
             return $datas;
@@ -234,7 +234,86 @@ class APIManager extends Model
             return [];
         }
     }
+
+    public function getDBAllMessageAnnonce()
+    {
+        try {
+            // Requête pour récupérer tous les messages avec leurs IDs associés
+            $query = "SELECT * FROM MessageAnnonce";
+            // Exécute la requête avec la méthode executeAndFetchAll()
+            $messages = $this->executeAndFetchAll($query);
+            // Retourne les messages au format JSON
+            return $messages;
+        } catch (Exception $e) {
+            // Gère les erreurs
+            $error = ['error' => $e->getMessage()];
+            return $error;
+        }
+    }
+
+    public function insertMessageAnnonce($formData)
+    {
+        // Je prépare la requête SQL pour insérer les données dans la base de données
+        $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_Users, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            // Je prépare la requête SQL
+            $stmt = $this->getBdd()->prepare($sql);
+            // Je lie les valeurs aux paramètres de la requête
+            $stmt->bindValue(1, $formData->userName);
+            $stmt->bindValue(2, $formData->userEmail);
+            $stmt->bindValue(3, $formData->userPhone);
+            $stmt->bindValue(4, $formData->message);
+            $stmt->bindValue(5, $formData->createdAt);
+            // Si Id_Users est null, je lie NULL à la colonne correspondante dans la base de données
+            if ($formData->Id_Users === null) {
+                $stmt->bindValue(6, null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(6, $formData->Id_Users);
+            }
+            $stmt->bindValue(7, $formData->Id_CarAnnonce);
+            // J'exécute la requête
+            $stmt->execute();
+            // Je vérifie si l'insertion a réussi en vérifiant le nombre de lignes affectées
+            if ($stmt->rowCount() > 0) {
+                // Je retourne true si l'insertion est réussie
+                return true;
+            } else {
+                // Je retourne false si l'insertion a échoué
+                return false;
+            }
+        } catch (PDOException $e) {
+            // Je gère les erreurs éventuelles lors de l'exécution de la requête
+            error_log("Error in insertMessageAnnonce: " . $e->getMessage());
+            return false;
+        }
+    }
+
     // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
+    public function insertContactMessage($formData)
+    {
+        $req = "INSERT INTO ContactMessage (name, email, phone, message, created_at) VALUES (?, ?, ?, ?, ?)";
+        try {
+            $stmt = $this->getBdd()->prepare($req);
+            $stmt->execute([
+                $formData->name,
+                $formData->email,
+                $formData->phone,
+                $formData->message,
+                $formData->createdAt
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            error_log("Error in insertContactMessage: " . $e->getMessage());
+            // Retourner false si l'insertion a échoué
+            return false;
+        }
+    }
+
+    public function getDBContactMessage()
+    {
+        $req = "SELECT * FROM ContactMessage";
+        return $this->executeAndFetchAll($req);
+    }
 
     public function getDBImages()
     {
@@ -284,11 +363,6 @@ class APIManager extends Model
         return $this->executeAndFetchAll($req);
     }
 
-    public function getDBMessage()
-    {
-        $req = "SELECT * FROM MessageAnnonce";
-        return $this->executeAndFetchAll($req);
-    }
 
     public function getDBResetPassword()
     {
