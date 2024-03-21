@@ -502,6 +502,9 @@ VALUES
 MODIFY COLUMN Id_Users INT NULL,
 MODIFY COLUMN Id_CarAnnonce INT NULL;
 
+ALTER TABLE Testimonials MODIFY COLUMN Id_Users INT NULL;
+
+
 -- Dans Images
 INSERT INTO Images (image_url, imageName, Id_CarAnnonce)
 VALUES

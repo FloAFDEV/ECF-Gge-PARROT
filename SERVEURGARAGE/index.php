@@ -24,7 +24,6 @@ try {
         $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
         if (!isset($url[0]) || !isset($url[1]))
             throw new Exception("La page demandée n'éxiste pas");
-
         $allowedActions = [
             "cars", "models", "brands", "garage", "images",
             "testimonials", "opening", "services", "options",
@@ -34,10 +33,21 @@ try {
         if (!in_array($url[1], $allowedActions)) {
             throw new Exception("Oups! cette action n'éxiste pas");
         }
-
         switch ($url[0]) {
             case "api":
                 switch ($url[1]) {
+                    case "annonces":
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            $apiController->getAnnonceByID($url[2]);
+                        } elseif (!isset($url[2])) {
+                            // Gérer le cas où aucun identifiant n'est fourni
+                            // Cela peut inclure la logique pour récupérer toutes les voitures
+                            $apiController->getAllAnnonces();
+                        } else {
+                            // Gérer le cas où l'identifiant n'est pas un nombre valide
+                            throw new Exception("Identifiant du véhicule invalide");
+                        }
+                        break;
                     case "cars":
                         // Gérer les méthodes pour les voitures
                         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -48,6 +58,20 @@ try {
                             //     $apiController->updateCar();
                             // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                             //     $apiController->deleteCar();
+                        } else {
+                            throw new Exception("Méthode non autorisée");
+                        }
+                        break;
+                    case "garage":
+                        // Gérer les méthodes pour les modèles
+                        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                            $apiController->getGarage();
+                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            //     $apiController->insertGarage();
+                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+                            //     $apiController->updateGarage();
+                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+                            //     $apiController->deleteGarage();
                         } else {
                             throw new Exception("Méthode non autorisée");
                         }
@@ -80,20 +104,6 @@ try {
                             throw new Exception("Méthode non autorisée");
                         }
                         break;
-                    case "garage":
-                        // Gérer les méthodes pour le garage
-                        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                            $apiController->getGarage();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            //     $apiController->insertGarage();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-                            //     $apiController->updateGarage();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-                            //     $apiController->deleteGarage();
-                        } else {
-                            throw new Exception("Méthode non autorisée");
-                        }
-                        break;
                     case "images":
                         // Gérer les méthodes pour les images
                         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -112,8 +122,8 @@ try {
                         // Gérer les méthodes pour les témoignages
                         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             $apiController->getTestimonials();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            //     $apiController->insertTestimonial();
+                        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            $apiController->insertTestimonial();
                             // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
                             //     $apiController->updateTestimonial();
                             // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
@@ -185,25 +195,6 @@ try {
                             //     $apiController->updateEnergyType();
                             // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                             //     $apiController->deleteEnergyType();
-                        } else {
-                            throw new Exception("Méthode non autorisée");
-                        }
-                        break;
-                    case "annonces":
-                        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                            if (isset($url[2]) && is_numeric($url[2])) {
-                                $apiController->getAnnonceByID($url[2]);
-                            } elseif (!isset($url[2])) {
-                                $apiController->getAllAnnonces();
-                            } else {
-                                throw new Exception("Identifiant du véhicule invalide");
-                            }
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            //     $apiController->insertAnnonce();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-                            //     $apiController->updateAnnonce();
-                            // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-                            //     $apiController->deleteAnnonce();
                         } else {
                             throw new Exception("Méthode non autorisée");
                         }

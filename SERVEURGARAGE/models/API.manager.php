@@ -288,7 +288,7 @@ class APIManager extends Model
         }
     }
 
-    // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
+
     public function insertContactMessage($formData)
     {
         $req = "INSERT INTO ContactMessage (name, email, phone, message, created_at) VALUES (?, ?, ?, ?, ?)";
@@ -319,6 +319,27 @@ class APIManager extends Model
     {
         $req = "SELECT * FROM Images";
         return $this->executeAndFetchAll($req);
+    }
+
+    public function insertTestimonial($TestimonialformData)
+    {
+        $req = "INSERT INTO Testimonials (pseudo, userEmail, message, createdAt, note, Id_Users) VALUES (?, ?, ?, ?, ?, ?)";
+        try {
+            $stmt = $this->getBdd()->prepare($req);
+            $stmt->execute([
+                $TestimonialformData['pseudo'],
+                $TestimonialformData['userEmail'],
+                $TestimonialformData['message'],
+                $TestimonialformData['createdAt'],
+                $TestimonialformData['note'],
+                $TestimonialformData['userId'] ?? null,
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            error_log("Error in insertTestimonials: " . $e->getMessage());
+            // Retourner false si l'insertion a échoué
+            return false;
+        }
     }
 
     public function getDBTestimonials()
