@@ -20,6 +20,8 @@ try {
         throw new Exception("La page demandée n'éxiste pas");
     } else {
         header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
         $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
         if (!isset($url[0]) || !isset($url[1]))

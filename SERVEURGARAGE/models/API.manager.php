@@ -252,59 +252,74 @@ class APIManager extends Model
     }
 
     public function insertMessageAnnonce($formData)
-    {
-        // Je prépare la requête SQL pour insérer les données dans la base de données
+    {  // Vérification des champs requis
+        if (empty($formData['userName']) || empty($formData['userEmail']) || empty($formData['userPhone']) || empty($formData['message'])) {
+            return false; // Les champs requis ne doivent pas être vides
+        }
+        // Validation de l'e-mail
+        if (!filter_var($formData['userEmail'], FILTER_VALIDATE_EMAIL)) {
+            return false; // L'e-mail doit être dans un format valide
+        }
+        // Validation du numéro de téléphone
+        if (!preg_match("/^(0|\+33)[1-9][0-9]{8}$/", $formData['userPhone'])) {
+            return false; // Le numéro de téléphone doit être dans un format valide
+        }
+        // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
         $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_Users, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
-            // Je prépare la requête SQL
+            // Préparation de la requête SQL
             $stmt = $this->getBdd()->prepare($sql);
-            // Je lie les valeurs aux paramètres de la requête
-            $stmt->bindValue(1, $formData->userName);
-            $stmt->bindValue(2, $formData->userEmail);
-            $stmt->bindValue(3, $formData->userPhone);
-            $stmt->bindValue(4, $formData->message);
-            $stmt->bindValue(5, $formData->createdAt);
-            // Si Id_Users est null, je lie NULL à la colonne correspondante dans la base de données
-            if ($formData->Id_Users === null) {
-                $stmt->bindValue(6, null, PDO::PARAM_NULL);
-            } else {
-                $stmt->bindValue(6, $formData->Id_Users);
-            }
-            $stmt->bindValue(7, $formData->Id_CarAnnonce);
-            // J'exécute la requête
-            $stmt->execute();
-            // Je vérifie si l'insertion a réussi en vérifiant le nombre de lignes affectées
-            if ($stmt->rowCount() > 0) {
-                // Je retourne true si l'insertion est réussie
-                return true;
-            } else {
-                // Je retourne false si l'insertion a échoué
-                return false;
-            }
+            // Exécution de la requête avec les valeurs des champs
+            $stmt->execute([
+                $formData['userName'],
+                $formData['userEmail'],
+                $formData['userPhone'],
+                $formData['message'],
+                $formData['createdAt'],
+                // Si Id_Users est null, valeur null dans la base de données
+                $formData['Id_Users'] === null ? null : $formData['Id_Users'],
+                $formData['Id_CarAnnonce']
+            ]);
+            // Retourne true si l'insertion est réussie
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            // Je gère les erreurs éventuelles lors de l'exécution de la requête
+            // Gestion des erreurs et enregistrement dans le journal des erreurs
             error_log("Error in insertMessageAnnonce: " . $e->getMessage());
+            // Retourne false si l'insertion a échoué
             return false;
         }
     }
 
 
+
     public function insertContactMessage($formData)
     {
-        $req = "INSERT INTO ContactMessage (name, email, phone, message, created_at) VALUES (?, ?, ?, ?, ?)";
+        $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
         try {
             $stmt = $this->getBdd()->prepare($req);
-            $stmt->execute([
-                $formData->name,
-                $formData->email,
-                $formData->phone,
-                $formData->message,
-                $formData->createdAt
-            ]);
-            return true;
+
+            // Valide et échappe les données
+            $name = substr($formData->name, 0, 255); // Limiterla longueur du champ à 255 caractères
+            $email = filter_var($formData->email, FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
+            $phone = preg_replace("/[^0-9]/", "", $formData->phone); // Supprime les caractères non numériques
+            $message = substr($formData->message, 0, 1000); // Limite la longueur du champ à 1000 caractères
+
+            // Vérification de la validité de l'e-mail
+            if (!$email) {
+                return false; // Retourne false si l'e-mail est invalide
+            }
+
+            // Exécute de la requête avec les valeurs des champs
+            $stmt->execute([$name, $email, $phone, $message]);
+            // Vérification du nombre de lignes affectées pour s'assurer que l'insertion s'est bien déroulée
+            if ($stmt->rowCount() > 0) {
+                return true; // Retourne true si l'insertion a réussi
+            } else {
+                return false; // Retourne false si aucune ligne n'a été insérée
+            }
         } catch (PDOException $e) {
             error_log("Error in insertContactMessage: " . $e->getMessage());
-            // Retourner false si l'insertion a échoué
+            // Retourne false si une exception PDO est levée
             return false;
         }
     }
@@ -323,21 +338,35 @@ class APIManager extends Model
 
     public function insertTestimonial($TestimonialformData)
     {
-        $req = "INSERT INTO Testimonials (pseudo, userEmail, message, createdAt, note, Id_Users) VALUES (?, ?, ?, ?, ?, ?)";
+        // Requête SQL paramétrée pour insérer les données dans la table Testimonials
+        $sql = "INSERT INTO Testimonials (pseudo, userEmail, message, createdAt, note, Id_Users) VALUES (?, ?, ?, ?, ?, ?)";
         try {
-            $stmt = $this->getBdd()->prepare($req);
+            // Conversion de la note en nombre flottant
+            $note = floatval($TestimonialformData['note']);   // Préparation de la requête SQL
+            $stmt = $this->getBdd()->prepare($sql);
+            // Validation et échappement des données
+            $pseudo = substr($TestimonialformData['pseudo'], 0, 255); // Limiter la longueur du champ à 255 caractères
+            $email = filter_var($TestimonialformData['userEmail'], FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
+            $message = substr($TestimonialformData['message'], 0, 1000); // Limiter la longueur du champ à 1000 caractères
+            // Vérification de la validité de l'e-mail
+            if (!$email) {
+                return false; // Retourne false si l'e-mail est invalide
+            }
+            // Exécution de la requête avec les valeurs des champs
             $stmt->execute([
-                $TestimonialformData['pseudo'],
-                $TestimonialformData['userEmail'],
-                $TestimonialformData['message'],
-                $TestimonialformData['createdAt'],
-                $TestimonialformData['note'],
-                $TestimonialformData['userId'] ?? null,
+                htmlspecialchars($pseudo),
+                htmlspecialchars($email),
+                htmlspecialchars($message),
+                htmlspecialchars($TestimonialformData['createdAt']),
+                $note,
+                isset($TestimonialformData['userId']) ? htmlspecialchars($TestimonialformData['userId']) : null, // Si userId est null, utilisez la valeur null dans la base de données
             ]);
-            return true;
+            // Retourne true si l'insertion est réussie
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
+            // Gestion des erreurs et enregistrement dans le journal des erreurs
             error_log("Error in insertTestimonials: " . $e->getMessage());
-            // Retourner false si l'insertion a échoué
+            // Retourne false si l'insertion a échoué
             return false;
         }
     }
@@ -395,5 +424,34 @@ class APIManager extends Model
     {
         $req = "SELECT * FROM Users";
         return $this->executeAndFetchAll($req);
+    }
+
+    public static function getUserByEmail($email)
+    {
+        $req = "SELECT * FROM Users WHERE email = :email";
+        $params = array(':email' => $email);
+        $apiManager = new self(); // Créer une instance de APIManager
+        return $apiManager->executeAndFetchAll($req, $params);
+    }
+
+    // Méthode pour créer un nouvel utilisateur
+    public function createUser($email, $name, $phone, $pseudo, $role, $passwordHash, $primaryGarage_Id, $Id_Garage)
+    {
+        // Préparez votre requête SQL pour insérer un nouvel utilisateur
+        $req = "INSERT INTO Users (email, name, phone, pseudo, role, password_hash, primaryGarage_Id, Id_Garage) 
+                VALUES (:email, :name, :phone, :pseudo, :role, :password, :primaryGarage_Id, :Id_Garage)";
+        // Préparez les paramètres
+        $params = array(
+            ':email' => $email,
+            ':name' => $name,
+            ':phone' => $phone,
+            ':pseudo' => $pseudo,
+            ':role' => $role,
+            ':passwordHash' => $passwordHash,
+            ':primaryGarage_Id' => $primaryGarage_Id,
+            ':Id_Garage' => $Id_Garage
+        );
+        // Exécutez la requête et retournez le résultat
+        return $this->executeAndFetchAll($req, $params);
     }
 }

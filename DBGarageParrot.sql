@@ -93,6 +93,9 @@ CREATE TABLE Users
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+ALTER TABLE Users
+ADD COLUMN password_hash VARCHAR(255) NOT NULL;
+
 -- Création de la table Testimonials / Relation 1:N entre Users et Testimonials 
 CREATE TABLE Testimonials
 (
@@ -570,6 +573,12 @@ VALUES
 
 ALTER TABLE MessageAnnonce
 MODIFY COLUMN Id_Users INT NULL;
+
+UPDATE Users SET password_hash = PASSWORD(CONVERT(password USING utf8mb4));
+
+
+ALTER TABLE Users DROP COLUMN password;
+
 
 
 -- Ajout de "power" comme entier
