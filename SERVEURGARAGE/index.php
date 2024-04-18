@@ -251,13 +251,30 @@ try {
                             throw new Exception("Méthode non autorisée");
                         }
                         break;
-                        // case "login":
-                        //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                        //         $apiController->login();
-                        //     } else {
-                        //         throw new Exception("Méthode non autorisée");
-                        //     }
-                        //     break;
+                    case "login":
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            // Récupérez les données d'authentification depuis le corps de la requête
+                            $data = json_decode(file_get_contents("php://input"));
+                            // Vérifiez si les données requises sont présentes
+                            if (!isset($data->email) || !isset($data->password)) {
+                                throw new Exception("Email et mot de passe requis");
+                            }
+                            // Appelez la méthode d'authentification de l'administrateur
+                            $authResult = $AdminController->authenticateAdmin($data->email, $data->password);
+                            // Vérifiez le résultat de l'authentification
+                            if ($authResult) {
+                                // L'authentification est réussie, renvoie une réponse appropriée
+                                $response = ["message" => "Authentification réussie"];
+                                Model::sendJSON($response);
+                            } else {
+                                // L'authentification a échouée, renvoie une réponse d'erreur
+                                $error = ["error" => "Email ou mot de passe incorrect"];
+                                Model::sendJSON($error);
+                            }
+                        } else {
+                            throw new Exception("Méthode non autorisée");
+                        }
+                        break;
                     default:
                         throw new Exception("Oups! Cette page n'existe pas");
                 }

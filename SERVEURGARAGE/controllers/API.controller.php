@@ -163,14 +163,14 @@ class APIController
     }
 
     public function getContactMessage()
-    { // Récupération des informations via APIManager avec la fonction getResetPassword
+    { // Récupération des informations via APIManager avec la fonction getContactMessage
         $password = $this->apiManager->getDBContactMessage();
         Model::sendJSON($password);
         // $this->displayData($resetPassword);
     }
 
     public function getUsers()
-    {
+    {    // Récupération des informations via APIManager avec la fonction getUsers
         $users = $this->apiManager->getDBUsers();
         Model::sendJSON($users);
         // $this->displayData($users);

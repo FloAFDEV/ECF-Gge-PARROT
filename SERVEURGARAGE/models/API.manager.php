@@ -439,7 +439,7 @@ class APIManager extends Model
     {
         // Préparez votre requête SQL pour insérer un nouvel utilisateur
         $req = "INSERT INTO Users (email, name, phone, pseudo, role, password_hash, primaryGarage_Id, Id_Garage) 
-                VALUES (:email, :name, :phone, :pseudo, :role, :password, :primaryGarage_Id, :Id_Garage)";
+            VALUES (:email, :name, :phone, :pseudo, :role, :passwordHash, :primaryGarage_Id, :Id_Garage)";
         // Préparez les paramètres
         $params = array(
             ':email' => $email,
