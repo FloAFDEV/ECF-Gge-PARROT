@@ -12,6 +12,7 @@ require_once "controllers/API.controller.php";
 require_once "models/Model.php";
 require_once "utils/auth.php";
 
+
 $apiController = new APIController();
 
 try {
@@ -20,7 +21,6 @@ try {
     $userId = $adminManager->getUserIDFromDatabase($_SESSION['email']); // Récupère l'ID du user connecté à partir de la session
     $userRole = $adminManager->getUserRoleFromDatabase($_SESSION['email']); // Récupère le role du user connecté à partir de la session
 
-    // Génération du jeton d'authentification
     $token = generateAuthToken($userId, $_SESSION['email']); // prend Id et email du user pour générer un token
 
     if (empty($_GET['page'])) {
