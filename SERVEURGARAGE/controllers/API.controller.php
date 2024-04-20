@@ -2,9 +2,6 @@
 require_once "models/API.manager.php";
 require_once "models/Model.php";
 
-
-
-
 // méthodes
 class APIController
 {
@@ -225,6 +222,30 @@ class APIController
                 http_response_code(500); // Internal Server Error
                 Model::sendJSON($response);
             }
+        }
+    }
+
+    public function authenticateUser()
+    {
+        // Récupére les informations d'identification de l'utilisateur depuis la demande
+        $data = json_decode(file_get_contents("php://input"), true);
+        // Vérifier si les données requises sont présentes
+        if (!isset($data['email']) || !isset($data['password'])) {
+            http_response_code(400); // Mauvaise requête
+            Model::sendJSON(["error" => "Email et mot de passe requis"]);
+            return;
+        }
+        // Authentifie l'utilisateur via APIManager
+        $authResult = $this->apiManager->authenticateUser($data['email'], $data['password']);
+        // Vérifie le résultat de l'authentification
+        if ($authResult) {
+            // Authentification réussie, renvoie une réponse appropriée
+            http_response_code(200); // OK
+            Model::sendJSON(["message" => "Authentification réussie"]);
+        } else {
+            // L'authentification a échoué, renvoie une réponse d'erreur
+            http_response_code(401); // Non autorisé
+            Model::sendJSON(["error" => "Email ou mot de passe incorrect"]);
         }
     }
 }

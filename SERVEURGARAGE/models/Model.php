@@ -25,7 +25,7 @@ abstract class Model
     {
         // On vérifie si l'instance de PDO existe
         if (self::$pdo === null) {
-            self::setBdd($GLOBALS['dbConfig']); // Passer les informations de configuration de la base de données
+            self::setBdd($GLOBALS['dbConfig']); // Passe les informations de configuration de la base de données
         }
         return self::$pdo;
     }

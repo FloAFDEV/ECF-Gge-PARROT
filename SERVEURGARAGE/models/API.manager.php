@@ -1,6 +1,7 @@
 <?php
 
-require_once "models/Model.php";
+require_once("Model.php");
+
 
 // Fonction étendue et lée à la base de données
 // APIManager étendra Model (héritage)
@@ -437,7 +438,7 @@ class APIManager extends Model
     // Méthode pour créer un nouvel utilisateur
     public function createUser($email, $name, $phone, $pseudo, $role, $passwordHash, $primaryGarage_Id, $Id_Garage)
     {
-        // Préparez votre requête SQL pour insérer un nouvel utilisateur
+        // Prépare la requête SQL pour insérer un nouvel utilisateur
         $req = "INSERT INTO Users (email, name, phone, pseudo, role, password_hash, primaryGarage_Id, Id_Garage) 
             VALUES (:email, :name, :phone, :pseudo, :role, :passwordHash, :primaryGarage_Id, :Id_Garage)";
         // Préparez les paramètres
@@ -451,7 +452,23 @@ class APIManager extends Model
             ':primaryGarage_Id' => $primaryGarage_Id,
             ':Id_Garage' => $Id_Garage
         );
-        // Exécutez la requête et retournez le résultat
+        // Exécute la requête et retournez le résultat
         return $this->executeAndFetchAll($req, $params);
+    }
+
+    public function authenticateUser($email, $password)
+    {
+        // Récupére l'utilisateur depuis la base de données en fonction de l'e-mail
+        $user = $this->getUserByEmail($email);
+        // Vérifier si l'utilisateur existe
+        if (!empty($user)) {
+            // Vérifier si le mot de passe correspond
+            if (password_verify($password, $user[0]['password_hash'])) {
+                // L'authentification réussie, retourner true
+                return true;
+            }
+        }
+        // Si l'authentification échoue, retourne false
+        return false;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
-require "./Securite.class.php";
-require "./AdminManager.php";
+require_once "./Securite.class.php";
+require_once "./AdminManager.php";
 
 class AdminController
 {
@@ -14,20 +14,18 @@ class AdminController
 
     public function getPageLogin()
     {
-        require_once "views/admin/login.php";
-    }
-    public function connexion()
-    {
-        if (!empty($_POST['login']) && !empty($_POST['password'])) {
-            $login = Securite::secureHTML($_POST['login']);
-            $password = Securite::secureHTML($_POST['password']);
-            $adminManager = new AdminManager();
-            if ($this->adminManager->isConnexionValid($login, $password)) {
-                $_SESSION['login'] = $login;
-                header('Location: index.php?action=dashboard');
-            } else {
-                header('Location: index.php?action=login&error=1');
-            }
-        }
+        // Construit les données nécessaires à destination du Frontpour la page de connexion
+        $loginPageData = [
+            'pageTitle' => 'Connexion',
+            'formFields' => [
+                ['name' => 'email', 'label' => 'Adresse e-mail', 'type' => 'email'],
+                ['name' => 'password', 'label' => 'Mot de passe', 'type' => 'password']
+            ],
+            'actionUrl' => '/api/login', // URL de l'endpoint API pour la soumission du formulaire de connexion
+
+        ];
+        // Renvoie les données sous forme de JSON
+        header('Content-Type: application/json');
+        echo json_encode($loginPageData);
     }
 }

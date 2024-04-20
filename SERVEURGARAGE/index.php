@@ -1,9 +1,6 @@
 <?php
 
-require_once "controllers/API.controller.php";
-require_once "models/Model.php";
-
-
+session_start();
 // On définit une constante pour stocker l'URL de base de notre site
 define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") .
     "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
@@ -11,11 +8,21 @@ define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" :
 // On passe de http://localhost/..
 // -> https://wwww.site.com/...
 
+require_once "controllers/API.controller.php";
+require_once "models/Model.php";
+require_once "utils/auth.php";
 
 $apiController = new APIController();
 
-
 try {
+    // Vérifie l'authentification de l'utilisateur
+    $adminManager = new AdminManager();
+    $userId = $adminManager->getUserIDFromDatabase($_SESSION['email']); // Récupère l'ID du user connecté à partir de la session
+    $userRole = $adminManager->getUserRoleFromDatabase($_SESSION['email']); // Récupère le role du user connecté à partir de la session
+
+    // Génération du jeton d'authentification
+    $token = generateAuthToken($userId, $_SESSION['email']); // prend Id et email du user pour générer un token
+
     if (empty($_GET['page'])) {
         throw new Exception("La page demandée n'éxiste pas");
     } else {
@@ -159,7 +166,7 @@ try {
                             // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                             //     $apiController->deleteGarageService();
                         } else {
-                            exit("Méthode non autorisée");
+                            throw new Exception("Méthode non autorisée");
                         }
                         break;
                     case "options":
@@ -253,15 +260,15 @@ try {
                         break;
                     case "login":
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            // Récupérez les données d'authentification depuis le corps de la requête
+                            // Récupere les données d'authentification depuis le corps de la requête
                             $data = json_decode(file_get_contents("php://input"));
-                            // Vérifiez si les données requises sont présentes
+                            // Vérifie si les données requises sont présentes
                             if (!isset($data->email) || !isset($data->password)) {
                                 throw new Exception("Email et mot de passe requis");
                             }
                             // Appelez la méthode d'authentification de l'administrateur
-                            $authResult = $AdminController->authenticateAdmin($data->email, $data->password);
-                            // Vérifiez le résultat de l'authentification
+                            $authResult = $adminManager->isConnexionValid($data->email, $data->password);
+                            // Vérifi le résultat de l'authentification
                             if ($authResult) {
                                 // L'authentification est réussie, renvoie une réponse appropriée
                                 $response = ["message" => "Authentification réussie"];
