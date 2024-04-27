@@ -3,7 +3,7 @@
 use Firebase\JWT\JWT;
 
 require_once "./models/admin.manager.php";
-require_once '/Applications/MAMP/htdocs/ECF-Gge-PARROT/vendor/firebase/php-jwt/src/JWT.php';
+require_once __DIR__ . "/../../firebase/php-jwt/JWT.php";
 
 
 // Crée une instance de AdminManager
@@ -18,12 +18,10 @@ function generateSecretKey($length = 32)
 // Clé secrète pour la signature du token JWT
 $key = generateSecretKey();
 
-
 // Je définis une fonction pour générer un jeton d'authentification
-function generateAuthToken($email)
+function generateAuthToken($email, $key)
 {
     global $adminManager;
-    $key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
     // Récupère l'ID et le rôle de l'utilisateur à partir de l'email
     $userId = $adminManager->getUserIdByEmail($email); // Utilise la méthode getUserIdByEmail
     $userRole = $adminManager->getUserRoleByEmail($email); // Utilise la méthode getUserRoleByEmail
@@ -33,7 +31,6 @@ function generateAuthToken($email)
         'email' => $email,
         'role' => $userRole,
     ];
-
     // Je signe le jeton avec la clé secrète
     $jwt = JWT::encode($payload, $key, 'HS256');
     return $jwt;
@@ -42,9 +39,9 @@ function generateAuthToken($email)
 // Fonction pour vérifier le JWT
 function verifyJWT($jwt): ?stdClass
 {
-    $key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+    global $key;
     try {
-        $decoded = JWT::decode($jwt, $key($key, array('HS256')), null);
+        $decoded = JWT::decode($jwt, $key, $key('HS256'));
         echo "Contenu décodé du JWT : ";
         // var_dump($decoded);
         return $decoded;

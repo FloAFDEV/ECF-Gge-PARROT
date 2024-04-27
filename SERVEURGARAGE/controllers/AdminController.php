@@ -1,7 +1,7 @@
 <?php
 
 require_once "./Securite.class.php";
-require_once "./AdminManager.php";
+require_once "../models/admin.manager.php";
 
 class AdminController
 {
@@ -12,20 +12,19 @@ class AdminController
         $this->adminManager = new AdminManager();
     }
 
-    public function getPageLogin()
+    public function getPageAdmin()
     {
         // Construit les données nécessaires à destination du Frontpour la page de connexion
-        $loginPageData = [
+        $adminPageData = [
             'pageTitle' => 'Connexion',
             'formFields' => [
                 ['name' => 'email', 'label' => 'Adresse e-mail', 'type' => 'email'],
                 ['name' => 'password', 'label' => 'Mot de passe', 'type' => 'password']
             ],
-            'actionUrl' => '/api/login', // URL de l'endpoint API pour la soumission du formulaire de connexion
-
+            'actionUrl' => '${BASE_URL}admin', // URL de l'endpoint API pour la soumission du formulaire de connexion
         ];
         // Renvoie les données sous forme de JSON
         header('Content-Type: application/json');
-        echo json_encode($loginPageData);
+        echo json_encode($adminPageData);
     }
 }

@@ -298,18 +298,15 @@ class APIManager extends Model
         $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
         try {
             $stmt = $this->getBdd()->prepare($req);
-
             // Valide et échappe les données
             $name = substr($formData->name, 0, 255); // Limiterla longueur du champ à 255 caractères
             $email = filter_var($formData->email, FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
             $phone = preg_replace("/[^0-9]/", "", $formData->phone); // Supprime les caractères non numériques
             $message = substr($formData->message, 0, 1000); // Limite la longueur du champ à 1000 caractères
-
             // Vérification de la validité de l'e-mail
             if (!$email) {
                 return false; // Retourne false si l'e-mail est invalide
             }
-
             // Exécute de la requête avec les valeurs des champs
             $stmt->execute([$name, $email, $phone, $message]);
             // Vérification du nombre de lignes affectées pour s'assurer que l'insertion s'est bien déroulée
@@ -454,21 +451,5 @@ class APIManager extends Model
         );
         // Exécute la requête et retournez le résultat
         return $this->executeAndFetchAll($req, $params);
-    }
-
-    public function authenticateUser($email, $password)
-    {
-        // Récupére l'utilisateur depuis la base de données en fonction de l'e-mail
-        $user = $this->getUserByEmail($email);
-        // Vérifier si l'utilisateur existe
-        if (!empty($user)) {
-            // Vérifier si le mot de passe correspond
-            if (password_verify($password, $user[0]['password_hash'])) {
-                // L'authentification réussie, retourner true
-                return true;
-            }
-        }
-        // Si l'authentification échoue, retourne false
-        return false;
     }
 }
