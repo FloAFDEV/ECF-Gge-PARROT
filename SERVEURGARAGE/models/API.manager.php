@@ -206,7 +206,6 @@ class APIManager extends Model
         //requête pour Garage
         $req = "SELECT *
         FROM Garage";
-
         //Je prépare ma requête
         $stmt = $this->getBdd()->prepare($req);
         // Je lance son execution

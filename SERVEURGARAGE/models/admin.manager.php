@@ -1,5 +1,6 @@
 <?php
 
+
 require_once "./models/Model.php";
 
 $adminManager = new AdminManager();
@@ -52,7 +53,7 @@ class AdminManager extends Model
         // Afficher les résultats de la vérification
         // var_dump("Mot de passe saisi : ", $password);
         // var_dump("La vérification de mot de passe est un succès ? ", $isValid);
-        // // Retourner le résultat de la vérification
+        // // Retourne le résultat de la vérification
         // var_dump($isValid);
         return $isValid;
     }
@@ -116,10 +117,14 @@ class AdminManager extends Model
         }
         // Si les identifiants sont valides, récupère le rôle de l'utilisateur
         $userRole = $this->getUserRoleByEmail($email);
-        // Assurez-vous d'obtenir d'abord l'ID de l'utilisateur avant de l'utiliser
+        // Récupérer le mot de passe haché de la base de données
+        $passwordBD = $this->getPasswordHashByEmail($email);
+        // Vérifie si le mot de passe correspond au mot de passe haché avec bcrypt
+        $isValid = password_verify($password, $passwordBD);
+        // ID de l'utilisateur avant de l'utiliser
         $userId = $this->getUserIdByEmail($email);
         var_dump($userId, $userRole, $email);
         // Retourne l'ID de l'utilisateur et son rôle
-        return ["userId" => $userId, "userRole" => $userRole];
+        return ["userId" => $userId, "userRole" => $userRole, "isValid" => true];
     }
 }

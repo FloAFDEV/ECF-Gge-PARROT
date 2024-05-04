@@ -204,23 +204,23 @@ class APIController
         header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
         $formData = json_decode(file_get_contents('php://input'));
         if ($formData === null) {
-            http_response_code(400); // Bad Request
+            http_response_code(400); // Mauvaise requete
             Model::sendJSON(["error" => "Aucunes données transmises dans le formulaire"]);
         } else {
             try {
-                // Utiliser l'instance existante de APIManager
+                // Utilise l'instance existante de APIManager
                 $result = $this->apiManager->insertMessageAnnonce($formData);
                 if ($result === true) {
                     http_response_code(200); // OK
                     Model::sendJSON(["success" => "Votre message a bien été envoyé"]);
                 } else {
                     $response = ["error" => "Une erreur est survenue lors de l'envoi de votre message"];
-                    http_response_code(500); // Internal Server Error
+                    http_response_code(500); // Erreur Serveur
                     Model::sendJSON($response);
                 }
             } catch (Exception $e) {
                 $response = ["error" => $e->getMessage()];
-                http_response_code(500); // Internal Server Error
+                http_response_code(500); // Erreur Serveur
                 Model::sendJSON($response);
             }
         }

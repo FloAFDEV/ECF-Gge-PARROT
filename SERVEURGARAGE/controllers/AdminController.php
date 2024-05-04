@@ -14,6 +14,7 @@ class AdminController
 
     public function getPageAdmin()
     {
+        $baseUrl = getenv('BASE_URL');
         // Construit les données nécessaires à destination du Frontpour la page de connexion
         $adminPageData = [
             'pageTitle' => 'Connexion',

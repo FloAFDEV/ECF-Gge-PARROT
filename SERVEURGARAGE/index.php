@@ -12,8 +12,7 @@ define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" :
 require_once "controllers/API.controller.php";
 require_once "./models/admin.manager.php";
 require_once "./models/Model.php";
-require_once "utils/auth.php";
-
+require_once "./utils/auth.php";
 
 $adminManager = new AdminManager();
 
@@ -21,13 +20,23 @@ session_start();
 
 $apiController = new APIController();
 
-// On vérifie si la page demandée est définie en GET, sinon on utilise par défaut la page d'accueil
+// Vérification de l'authentification pour la route admin
+if ($_SERVER['REQUEST_URI'] === '/admin') {
+    // Vérification de l'authentification avec le middleware
+    $userData = requireAuth();
+    if (!$userData) {
+        // Si l'utilisateur n'est pas authentifié, envoie une réponse d'erreur
+        http_response_code(401);
+        echo json_encode(["error" => "Authentification requise"]);
+        exit();
+    }
+}
 
+// On vérifie si la page demandée est définie en GET, sinon on utilise par défaut la page d'accueil
 if (empty($_GET['page'])) {
     throw new Exception("La page demandée n'éxiste pas");
 } else {
-    header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
-    header("Access-Control-Allow-Origin: http://localhost:3000");
+    header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app, http://localhost:3000");
     header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
     $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
@@ -262,13 +271,16 @@ if (empty($_GET['page'])) {
                     }
                     break;
                 case "admin":
+                    // Définition des en-têtes CORS
+                    header("Access-Control-Allow-Origin: *");
+                    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
                     // Vérification de la méthode POST
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Vérification des identifiants
                         $email = $_POST['email'];
                         $password = $_POST['password'];
-                        // var_dump("Email saisi : ", $email); // Ajoutez cette ligne pour vérifier l'e-mail saisi
-                        // var_dump("Mot de passe saisi : ", $password); // Ajoutez cette ligne pour vérifier le mot de passe saisi
+                        // var_dump("Email saisi : ", $email);
+                        // var_dump("Mot de passe saisi : ", $password); 
                         $credentialsValid = $adminManager->checkCredentials($_POST['email'], $_POST['password']);
                         if ($credentialsValid) {
                             // Récupération de l'ID de l'utilisateur à partir de son e-mail
@@ -277,18 +289,17 @@ if (empty($_GET['page'])) {
                             $userRole = $adminManager->getUserRoleByEmail($_POST['email']);
                             // Génération d'un nouveau jeton JWT
                             $token = generateAuthToken($userId, $userRole);
-                            // Envoi du jeton dans l'en-tête de réponse
-                            header('New-Token: ' . $token);
-                            // var_dump("token généré:" . $token);
-                            $response = ["message" => "Authentification réussie"];
-                            Model::sendJSON($response);
+                            // Envoi du jeton dans le corps de la réponse JSON
+                            http_response_code(200); // OK
+                            echo json_encode(["token" => $token]);
                         } else {
-                            $error = ["error" => "Identifiants incorrects ! Veuillez réessayer."];
-                            Model::sendJSON($error);
+                            http_response_code(401); // Non autorisé
+                            echo json_encode(["error" => "Identifiants incorrects ! Veuillez réessayer."]);
+                            exit(); // le script est arrêté après avoir envoyé la réponse
                         }
                     } else {
                         // Vérification de l'authentification avec le middleware
-                        require_once "middleware.php";
+                        require_once "./utils/auth.php";
                         $userData = requireAuth();
                         if (!$userData) {
                             // Si l'utilisateur n'est pas authentifié, renvoie une réponse d'erreur
@@ -296,7 +307,7 @@ if (empty($_GET['page'])) {
                             echo json_encode(["error" => "Authentification requise"]);
                             exit();
                         }
-                        // Si l'utilisateur est authentifié,message de bienvenue avec son nom complet et son rôle
+                        // Si l'utilisateur est authentifié, message de bienvenue avec son nom complet et son rôle
                         $fullName = $userData->fullName;
                         $role = $userData->role;
                         $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";
