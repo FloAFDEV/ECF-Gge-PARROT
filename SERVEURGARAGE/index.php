@@ -280,7 +280,7 @@ if (empty($_GET['page'])) {
                         $email = $_POST['email'];
                         $password = $_POST['password'];
                         // var_dump("Email saisi : ", $email);
-                        // var_dump("Mot de passe saisi : ", $password); 
+                        // var_dump("Mot de passe saisi : ", $password);
                         $credentialsValid = $adminManager->checkCredentials($_POST['email'], $_POST['password']);
                         if ($credentialsValid) {
                             // Récupération de l'ID de l'utilisateur à partir de son e-mail
@@ -290,15 +290,16 @@ if (empty($_GET['page'])) {
                             // Génération d'un nouveau jeton JWT
                             $token = generateAuthToken($userId, $userRole);
                             // Envoi du jeton dans le corps de la réponse JSON
+
                             http_response_code(200); // OK
                             echo json_encode(["token" => $token]);
                         } else {
                             http_response_code(401); // Non autorisé
                             echo json_encode(["error" => "Identifiants incorrects ! Veuillez réessayer."]);
-                            exit(); // le script est arrêté après avoir envoyé la réponse
+                            exit(); // script arreté 
                         }
                     } else {
-                        // Vérification de l'authentification avec le middleware
+                        // Vérification de l'authentification avec le middleware (utils/auth.php)
                         require_once "./utils/auth.php";
                         $userData = requireAuth();
                         if (!$userData) {
@@ -307,7 +308,7 @@ if (empty($_GET['page'])) {
                             echo json_encode(["error" => "Authentification requise"]);
                             exit();
                         }
-                        // Si l'utilisateur est authentifié, message de bienvenue avec son nom complet et son rôle
+                        // Si l'utilisateur est authentifié, message de bienvenue avec nom complet et rôle
                         $fullName = $userData->fullName;
                         $role = $userData->role;
                         $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";

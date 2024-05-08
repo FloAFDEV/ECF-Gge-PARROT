@@ -123,7 +123,7 @@ class AdminManager extends Model
         $isValid = password_verify($password, $passwordBD);
         // ID de l'utilisateur avant de l'utiliser
         $userId = $this->getUserIdByEmail($email);
-        var_dump($userId, $userRole, $email);
+        // var_dump($userId, $userRole, $email);
         // Retourne l'ID de l'utilisateur et son rôle
         return ["userId" => $userId, "userRole" => $userRole, "isValid" => true];
     }
