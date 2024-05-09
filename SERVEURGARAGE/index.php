@@ -20,6 +20,11 @@ session_start();
 
 $apiController = new APIController();
 
+// Définition des en-têtes CORS
+header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 
 // Vérification de l'authentification pour la route admin
 if ($_SERVER['REQUEST_URI'] === '/admin') {
@@ -39,10 +44,7 @@ if (empty($_GET['page'])) {
     throw new Exception("La page demandée n'existe pas");
 }
 
-// Définition des en-têtes CORS
-header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 // Analyse de l'URL demandée
 $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
 if (!isset($url[0]) || !isset($url[1])) {
@@ -57,7 +59,6 @@ $allowedActions = [
 if (!in_array($url[1], $allowedActions)) {
     throw new Exception("Oups! cette action n'éxiste pas");
 }
-
 switch ($url[0]) {
     case "api":
         switch ($url[1]) {
