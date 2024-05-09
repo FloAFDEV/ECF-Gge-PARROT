@@ -560,8 +560,8 @@ INSERT INTO Users (email, name, phone, pseudo, role, password, primaryGarage_Id,
 VALUES
     ('chuck@norris.com', 'Chuck Norris', '03 68 17 60 33', 'Chuck', 'client', 'password', 1, 1),
     ('neo@matrix.com', 'Néo', '08 35 43 58 02', 'Néo', 'client', 'password', 1, 1),
-    ('vicky@vparrot.com', 'Vicky', '05 22 22 22 21', 'Vicky', 'employe', 'Vicky', 1, 1),
-    ('vparrot@vparrot.com', 'Vincent', '05 22 22 22 22', 'Vince', 'superAdmin', 'Vince', 1, 1);
+    ('vicky@vparrot.com', 'Vicky', '05 22 22 22 21', 'Vicky', 'employe', 'Vicky31', 1, 1),
+    ('vparrot@vparrot.com', 'Vincent', '05 22 22 22 22', 'Vince', 'superAdmin', 'Vince31', 1, 1);
 
 
 -- Dans témoignages (les id sont récupérés dans PHPMyAdmin)

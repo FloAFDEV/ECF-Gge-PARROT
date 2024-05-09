@@ -1,6 +1,9 @@
 <?php
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\BeforeValidException;
+use Firebase\JWT\SignatureInvalidException;
 
 $adminManager = new AdminManager();
 
@@ -19,6 +22,7 @@ function generateAuthToken($email)
     global $adminManager, $secretKey;
     $userId = $adminManager->getUserIdByEmail($email);
     $userRole = $adminManager->getUserRoleByEmail($email);
+    var_dump($userRole);
     $payload = [
         'user_id' => $userId,
         'email' => $email,
@@ -35,14 +39,25 @@ function verifyJWT($jwt): ?stdClass
     try {
         // Vérifier si le jeton JWT est vide
         if (!$jwt) {
-            throw new Exception("Le jeton JWT est manquant");
+            return null;
         }
+        // Décoder le jeton JWT
         $decoded = JWT::decode($jwt, $secretKey, $secretKey('HS256'));
+        var_dump($decoded);
         // Vérifier si le jeton JWT a expiré
         if (isset($decoded->exp) && $decoded->exp < time()) {
             throw new Exception("Le jeton JWT a expiré");
         }
+        // Retourner le jeton décodé
         return $decoded;
+    } catch (ExpiredException $e) {
+        throw new Exception("Le jeton JWT a expiré : " . $e->getMessage());
+    } catch (BeforeValidException $e) {
+        throw new Exception("Le jeton JWT n'est pas encore valide : " . $e->getMessage());
+    } catch (SignatureInvalidException $e) {
+        throw new Exception("Signature du jeton JWT invalide : " . $e->getMessage());
+    } catch (UnexpectedValueException $e) {
+        throw new Exception("Valeur inattendue dans le jeton JWT : " . $e->getMessage());
     } catch (Exception $e) {
         throw new Exception("Erreur de validation du jeton JWT : " . $e->getMessage());
     }

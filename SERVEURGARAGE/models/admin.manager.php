@@ -11,6 +11,7 @@ class AdminManager extends Model
     const ROLE_SUPERADMIN = 'superAdmin';
     const ROLE_ADMIN = 'admin';
     const ROLE_EMPLOYE = 'employé';
+    const ROLE_USER = "client";
 
     // Fonction pour hacher le mot de passe avec Bcrypt
     private function hashPassword($password)
@@ -19,7 +20,7 @@ class AdminManager extends Model
     }
 
     // Fonction pour hacher le mot de passe lors de l'inscription ou de la mise à jour
-    public function hashAndSavePassword($email, $password)
+    public function hashAndSavePassword($password)
     {
         $hashedPassword = $this->hashPassword($password);
         // Enregistre $hashedPassword dans la base de données
@@ -65,26 +66,47 @@ class AdminManager extends Model
         $stmt = $this->getBdd()->prepare("SELECT Id_Users FROM Users WHERE email = ?");
         $stmt->execute([$email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        // var_dump($result);
+        var_dump($result);
         return $result ? $result['Id_Users'] : null;
     }
 
     // Fonction pour récupérer le rôle de l'utilisateur à partir de l'email
     public function getUserRoleByEmail($email)
     {
-        $stmt = $this->getBdd()->prepare("SELECT role FROM Users WHERE email = ?");
-        $stmt->execute([$email]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        // var_dump($result);
-        return $result ? $result['role'] : null;
+        try {
+            var_dump($email);
+            // Prépare et exécute la requête SQL pour obtenir le rôle de l'utilisateur par e-mail
+            $stmt = $this->getBdd()->prepare("SELECT userRole FROM Users WHERE email = ?");
+            $stmt->execute([$email]);
+            // Vérifie si la requête a retourné des résultats
+            if ($stmt->rowCount() > 0) {
+                // Récupère le résultat de la requête
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                // Vérifie si le résultat est non vide
+                if ($result && isset($result['userRole'])) {
+                    // Retourne le rôle de l'utilisateur
+                    return $result['userRole'];
+                } else {
+                    // Lance une exception si aucun rôle n'est trouvé pour l'e-mail donné
+                    throw new Exception("Aucun rôle trouvé pour l'utilisateur avec l'email : $email");
+                }
+            } else {
+                // Lance une exception si aucun utilisateur n'est trouvé avec l'e-mail donné
+                throw new Exception("Aucun utilisateur trouvé avec l'email : $email");
+            }
+        } catch (PDOException $e) {
+            // Gère les erreurs de requête SQL
+            throw new Exception("Erreur lors de l'exécution de la requête SQL : " . $e->getMessage());
+        }
     }
+
+
 
     // Vérifie si un utilisateur a le rôle requis
     public function checkUserRole($email, $requiredRole)
     {
-
         $userRole = $this->getUserRoleByEmail($email);
-        return $userRole === $requiredRole;
+        return $userRole === $requiredRole || in_array($requiredRole, explode(',', $userRole));
     }
 
     // Vérifie si un utilisateur est un superadmin
@@ -111,9 +133,9 @@ class AdminManager extends Model
     {
         // Vérifie si les identifiants sont valides
         $isValid = $this->isConnexionValid($email, $password);
-        // Si les identifiants ne sont pas valides, retourne null
+        // Si les identifiants ne sont pas valides, retourne false
         if (!$isValid) {
-            return null;
+            return false;
         }
         // Si les identifiants sont valides, récupère le rôle de l'utilisateur
         $userRole = $this->getUserRoleByEmail($email);
@@ -121,10 +143,13 @@ class AdminManager extends Model
         $passwordBD = $this->getPasswordHashByEmail($email);
         // Vérifie si le mot de passe correspond au mot de passe haché avec bcrypt
         $isValid = password_verify($password, $passwordBD);
+        // Si le mot de passe ne correspond pas, retourne false
+        if (!$isValid) {
+            return false;
+        }
         // ID de l'utilisateur avant de l'utiliser
         $userId = $this->getUserIdByEmail($email);
-        // var_dump($userId, $userRole, $email);
-        // Retourne l'ID de l'utilisateur et son rôle
-        return ["userId" => $userId, "userRole" => $userRole, "isValid" => true];
+        // Retourne true si les identifiants sont valides
+        return true;
     }
 }
