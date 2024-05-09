@@ -20,6 +20,7 @@ session_start();
 
 $apiController = new APIController();
 
+
 // Vérification de l'authentification pour la route admin
 if ($_SERVER['REQUEST_URI'] === '/admin') {
     // Vérification de l'authentification avec le middleware
@@ -39,9 +40,9 @@ if (empty($_GET['page'])) {
 }
 
 // Définition des en-têtes CORS
-header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app, http://localhost:3000");
+header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 // Analyse de l'URL demandée
 $url = explode("/", filter_var($_GET['page'], FILTER_SANITIZE_URL));
 if (!isset($url[0]) || !isset($url[1])) {
@@ -56,7 +57,6 @@ $allowedActions = [
 if (!in_array($url[1], $allowedActions)) {
     throw new Exception("Oups! cette action n'éxiste pas");
 }
-
 
 switch ($url[0]) {
     case "api":
@@ -275,13 +275,11 @@ switch ($url[0]) {
                 }
                 break;
             case "admin":
-                // Vérification de la méthode POST
+                // Vérification de la méthode de la requête
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Vérification des identifiants
                     $email = $_POST['email'];
                     $password = $_POST['password'];
-                    // var_dump("Email saisi : ", $email);
-                    // var_dump("Mot de passe saisi : ", $password);
                     $credentialsValid = $adminManager->checkCredentials($_POST['email'], $_POST['password']);
                     if ($credentialsValid) {
                         // Récupération de l'ID de l'utilisateur à partir de son e-mail
@@ -296,7 +294,7 @@ switch ($url[0]) {
                     } else {
                         http_response_code(401); // Non autorisé
                         echo json_encode(["error" => "Identifiants incorrects ! Veuillez réessayer."]);
-                        exit(); // script arreté 
+                        exit(); // Sortie immédiate
                     }
                 } else {
                     // Vérification de l'authentification avec le middleware (utils/auth.php)
@@ -314,6 +312,22 @@ switch ($url[0]) {
                     $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";
                     echo json_encode(["message" => $welcomeMessage]);
                 }
+                break;
+            default:
+                // Vérification de l'authentification avec le middleware (utils/auth.php)
+                require_once "./utils/auth.php";
+                $userData = requireAuth();
+                if (!$userData) {
+                    // Si l'utilisateur n'est pas authentifié, renvoie une réponse d'erreur
+                    http_response_code(401);
+                    echo json_encode(["error" => "Authentification requise"]);
+                    exit();
+                }
+                // Si l'utilisateur est authentifié, message de bienvenue avec nom complet et rôle
+                $fullName = $userData->fullName;
+                $role = $userData->role;
+                $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";
+                echo json_encode(["message" => $welcomeMessage]);
                 break;
         }
 }
