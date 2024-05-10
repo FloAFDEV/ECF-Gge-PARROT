@@ -3,6 +3,7 @@
 require_once "./Securite.class.php";
 require_once "../models/admin.manager.php";
 
+
 class AdminController
 {
     private $adminManager;
@@ -22,7 +23,7 @@ class AdminController
                 ['name' => 'email', 'label' => 'Adresse e-mail', 'type' => 'email'],
                 ['name' => 'password', 'label' => 'Mot de passe', 'type' => 'password']
             ],
-            'actionUrl' => '${BASE_URL}admin', // URL de l'endpoint API pour la soumission du formulaire de connexion
+            'actionUrl' => $baseUrl . 'admin', // URL de l'endpoint API pour la soumission du formulaire de connexion
         ];
         // Renvoie les données sous forme de JSON
         header('Content-Type: application/json');

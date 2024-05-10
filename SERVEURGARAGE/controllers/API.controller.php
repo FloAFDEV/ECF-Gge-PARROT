@@ -6,15 +6,9 @@ require_once "models/Model.php";
 class APIController
 {
     private $apiManager;
-
-
     public function __construct()
     {
-        // Définir les en-têtes CORS pour toutes les routes de l'API
-        header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type, Authorization");
-        //J'instancie l'apiManager et adminMnager
+
         $this->apiManager = new APIManager();
     }
 
