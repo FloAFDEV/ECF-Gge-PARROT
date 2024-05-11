@@ -27,6 +27,6 @@ class AdminController
         ];
         // Renvoie les données sous forme de JSON
         header('Content-Type: application/json');
-        echo json_encode($adminPageData);
+        Model::sendJSON($adminPageData);
     }
 }

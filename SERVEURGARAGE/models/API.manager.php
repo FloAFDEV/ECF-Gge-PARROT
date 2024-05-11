@@ -251,35 +251,28 @@ class APIManager extends Model
         }
     }
 
-    public function insertMessageAnnonce($formData)
-    {  // Vérification des champs requis
-        if (empty($formData['userName']) || empty($formData['userEmail']) || empty($formData['userPhone']) || empty($formData['message'])) {
-            return false; // Les champs requis ne doivent pas être vides
-        }
-        // Validation de l'e-mail
-        if (!filter_var($formData['userEmail'], FILTER_VALIDATE_EMAIL)) {
-            return false; // L'e-mail doit être dans un format valide
-        }
-        // Validation du numéro de téléphone
-        if (!preg_match("/^(0|\+33)[1-9][0-9]{8}$/", $formData['userPhone'])) {
-            return false; // Le numéro de téléphone doit être dans un format valide
-        }
+    public function insertMessageAnnonce($Id_CarAnnonce, $formData)
+    {
+        // Vérification des propriétés de l'objet et définition des valeurs par défaut
+        $userName = isset($formData->userName) ? $formData->userName : '';
+        $userEmail = isset($formData->userEmail) ? $formData->userEmail : '';
+        $userPhone = isset($formData->userPhone) ? $formData->userPhone : '';
+        $message = isset($formData->message) ? $formData->message : '';
+        $createdAt = date('Y-m-d H:i:s'); // Date de création actuelle
         // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
-        $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_Users, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             // Préparation de la requête SQL
             $stmt = $this->getBdd()->prepare($sql);
-            // Exécution de la requête avec les valeurs des champs
-            $stmt->execute([
-                $formData['userName'],
-                $formData['userEmail'],
-                $formData['userPhone'],
-                $formData['message'],
-                $formData['createdAt'],
-                // Si Id_Users est null, valeur null dans la base de données
-                $formData['Id_Users'] === null ? null : $formData['Id_Users'],
-                $formData['Id_CarAnnonce']
-            ]);
+            // Liaison des valeurs aux paramètres de la requête
+            $stmt->bindParam(1, $userName, PDO::PARAM_STR);
+            $stmt->bindParam(2, $userEmail, PDO::PARAM_STR);
+            $stmt->bindParam(3, $userPhone, PDO::PARAM_STR);
+            $stmt->bindParam(4, $message, PDO::PARAM_STR);
+            $stmt->bindParam(5, $createdAt, PDO::PARAM_STR);
+            $stmt->bindParam(6, $Id_CarAnnonce, PDO::PARAM_INT);
+            // Exécution de la requête
+            $stmt->execute();
             // Retourne true si l'insertion est réussie
             return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -289,7 +282,6 @@ class APIManager extends Model
             return false;
         }
     }
-
 
 
     public function insertContactMessage($formData)
@@ -432,18 +424,18 @@ class APIManager extends Model
     }
 
     // Méthode pour créer un nouvel utilisateur
-    public function createUser($email, $name, $phone, $pseudo, $role, $passwordHash, $primaryGarage_Id, $Id_Garage)
+    public function createUser($email, $name, $phone, $pseudo, $userRole, $passwordHash, $primaryGarage_Id, $Id_Garage)
     {
         // Prépare la requête SQL pour insérer un nouvel utilisateur
-        $req = "INSERT INTO Users (email, name, phone, pseudo, role, password_hash, primaryGarage_Id, Id_Garage) 
-            VALUES (:email, :name, :phone, :pseudo, :role, :passwordHash, :primaryGarage_Id, :Id_Garage)";
+        $req = "INSERT INTO Users (email, name, phone, pseudo, userRole, password_hash, primaryGarage_Id, Id_Garage) 
+            VALUES (:email, :name, :phone, :pseudo, :userRole, :passwordHash, :primaryGarage_Id, :Id_Garage)";
         // Préparez les paramètres
         $params = array(
             ':email' => $email,
             ':name' => $name,
             ':phone' => $phone,
             ':pseudo' => $pseudo,
-            ':role' => $role,
+            ':userRole' => $userRole,
             ':passwordHash' => $passwordHash,
             ':primaryGarage_Id' => $primaryGarage_Id,
             ':Id_Garage' => $Id_Garage

@@ -25,6 +25,12 @@ header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// Vérifie si la demande est une demande OPTIONS préalable
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Si c'est le cas, renvoie les en-têtes CORS sans traitement supplémentaire
+    http_response_code(200);
+    exit();
+}
 
 // Vérification de l'authentification pour la route admin
 if ($_SERVER['REQUEST_URI'] === '/admin') {
@@ -256,12 +262,18 @@ switch ($url[0]) {
                     // Récupérer tous les messages pour toutes les annonces
                     $apiController->getAllMessageAnnonce();
                 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    $Id_CarAnnonce = $_POST['Id_CarAnnonce'];
-                    $apiController->insertMessageAnnonce($Id_CarAnnonce);
-                    // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-                    //     $apiController->updateMessageAnnonce();
-                    // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-                    //     $apiController->deleteMessageAnnonce();
+                    // Récupérer l'ID de l'annonce de voiture à partir des données POST
+                    $formData = json_decode(file_get_contents('php://input'));
+                    $Id_CarAnnonce = $formData->Id_CarAnnonce;
+                    // Vérifier si l'ID de l'annonce de voiture est défini
+                    if (isset($Id_CarAnnonce)) {
+                        // Appeler la méthode insertMessageAnnonce avec l'ID de l'annonce de voiture et les données du formulaire
+                        $apiController->insertMessageAnnonce($Id_CarAnnonce, $formData);
+                    } else {
+                        // Retourner une erreur si l'ID de l'annonce de voiture n'est pas défini
+                        http_response_code(400); // Mauvaise requête
+                        Model::sendJSON(["error" => "L'ID de l'annonce de voiture n'est pas défini"]);
+                    }
                 } else {
                     throw new Exception("Méthode non autorisée");
                 }
@@ -291,10 +303,10 @@ switch ($url[0]) {
                         $token = generateAuthToken($_POST['email'], $userRole);
                         // Envoi du jeton dans le corps de la réponse JSON
                         http_response_code(200); // OK
-                        echo json_encode(["token" => $token]);
+                        Model::sendJSON(["token" => $token]);
                     } else {
                         http_response_code(401); // Non autorisé
-                        echo json_encode(["error" => "Identifiants incorrects ! Veuillez réessayer."]);
+                        Model::sendJSON(["error" => "Identifiants incorrects ! Veuillez réessayer."]);
                         exit(); // Sortie immédiate
                     }
                 } else {
@@ -304,14 +316,14 @@ switch ($url[0]) {
                     if (!$userData) {
                         // Si l'utilisateur n'est pas authentifié, renvoie une réponse d'erreur
                         http_response_code(401);
-                        echo json_encode(["error" => "Authentification requise"]);
+                        Model::sendJSON(["error" => "Authentification requise"]);
                         exit();
                     }
                     // Si l'utilisateur est authentifié, message de bienvenue avec nom complet et rôle
                     $fullName = $userData->fullName;
-                    $role = $userData->role;
-                    $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";
-                    echo json_encode(["message" => $welcomeMessage]);
+                    $userRole = $userData->userRole;
+                    $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $userRole.";
+                    Model::sendJSON(["message" => $welcomeMessage]);
                 }
                 break;
             default:
@@ -321,14 +333,14 @@ switch ($url[0]) {
                 if (!$userData) {
                     // Si l'utilisateur n'est pas authentifié, renvoie une réponse d'erreur
                     http_response_code(401);
-                    echo json_encode(["error" => "Authentification requise"]);
+                    Model::sendJSON(["error" => "Authentification requise"]);
                     exit();
                 }
                 // Si l'utilisateur est authentifié, message de bienvenue avec nom complet et rôle
                 $fullName = $userData->fullName;
-                $role = $userData->role;
-                $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $role.";
-                echo json_encode(["message" => $welcomeMessage]);
+                $userRole = $userData->userRole;
+                $welcomeMessage = "Bienvenue, $fullName ! Vous êtes connecté en tant que $userRole.";
+                Model::sendJSON(["message" => $welcomeMessage]);
                 break;
         }
 }

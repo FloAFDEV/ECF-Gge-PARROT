@@ -42,9 +42,10 @@ abstract class Model
     public static function sendJSON($info)
     {
         // Définition des en-têtes pour permettre les requêtes cross-origin et spécifiant le type de contenu
-        header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
-        header("Content-Type: application/json; charset=UTF-8");
+        header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/json");
         // Encodage des données en JSON et envoi au client
         echo json_encode($info);
     }
 }
+// https://ggevparrot.vercel.app

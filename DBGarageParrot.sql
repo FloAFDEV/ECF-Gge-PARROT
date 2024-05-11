@@ -84,7 +84,7 @@ CREATE TABLE Users
     name             VARCHAR(255)                 NOT NULL,
     phone            VARCHAR(20)                  NOT NULL,
     pseudo           VARCHAR(255)                 NOT NULL UNIQUE,
-    role             VARCHAR(20) DEFAULT 'client' NOT NULL CHECK ( role IN ('superAdmin', 'admin', 'employe', 'client') ),
+    userRole             VARCHAR(20) DEFAULT 'client' NOT NULL CHECK ( userRole IN ('superAdmin', 'admin', 'employe', 'client') ),
     password         VARCHAR(255)                 NOT NULL,
     primaryGarage_Id INT,
     Id_Garage        INT                          NOT NULL,

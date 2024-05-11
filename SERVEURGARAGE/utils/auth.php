@@ -22,11 +22,11 @@ function generateAuthToken($email)
     global $adminManager, $secretKey;
     $userId = $adminManager->getUserIdByEmail($email);
     $userRole = $adminManager->getUserRoleByEmail($email);
-    var_dump($userRole);
+    // var_dump($userRole);
     $payload = [
         'user_id' => $userId,
         'email' => $email,
-        'role' => $userRole,
+        'userRole' => $userRole,
     ];
     $jwt = JWT::encode($payload, $secretKey, 'HS256');
     return $jwt;
@@ -43,7 +43,7 @@ function verifyJWT($jwt): ?stdClass
         }
         // Décoder le jeton JWT
         $decoded = JWT::decode($jwt, $secretKey, $secretKey('HS256'));
-        var_dump($decoded);
+        // var_dump($decoded);
         // Vérifier si le jeton JWT a expiré
         if (isset($decoded->exp) && $decoded->exp < time()) {
             throw new Exception("Le jeton JWT a expiré");

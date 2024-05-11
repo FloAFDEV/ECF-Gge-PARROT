@@ -66,7 +66,7 @@ class AdminManager extends Model
         $stmt = $this->getBdd()->prepare("SELECT Id_Users FROM Users WHERE email = ?");
         $stmt->execute([$email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        var_dump($result);
+        // var_dump($result);
         return $result ? $result['Id_Users'] : null;
     }
 
@@ -74,7 +74,7 @@ class AdminManager extends Model
     public function getUserRoleByEmail($email)
     {
         try {
-            var_dump($email);
+            // var_dump($email);
             // Prépare et exécute la requête SQL pour obtenir le rôle de l'utilisateur par e-mail
             $stmt = $this->getBdd()->prepare("SELECT userRole FROM Users WHERE email = ?");
             $stmt->execute([$email]);
