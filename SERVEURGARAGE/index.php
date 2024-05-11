@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_URI'] === '/admin') {
     if (!$userData) {
         // Si l'utilisateur n'est pas authentifié, envoie une réponse d'erreur
         http_response_code(401);
-        echo json_encode(["error" => "Authentification requise"]);
+        Model::sendJSON(["error" => "Authentification requise"]);
         exit();
     }
 }

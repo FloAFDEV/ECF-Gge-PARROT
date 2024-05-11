@@ -258,7 +258,7 @@ class APIManager extends Model
         $userEmail = isset($formData->userEmail) ? $formData->userEmail : '';
         $userPhone = isset($formData->userPhone) ? $formData->userPhone : '';
         $message = isset($formData->message) ? $formData->message : '';
-        $createdAt = date('Y-m-d H:i:s'); // Date de création actuelle
+        $createdAt = isset($formData->createdAt) ? $formData->createdAt : date('Y-m-d H:i:s'); // Date de création actuelle
         // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
         $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?)";
         try {

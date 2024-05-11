@@ -2,6 +2,12 @@
 require_once "models/API.manager.php";
 require_once "models/Model.php";
 
+// Définition des constantes pour les codes de statut HTTP
+define("HTTP_OK", 200);
+define("HTTP_BAD_REQUEST", 400);
+define("HTTP_INTERNAL_SERVER_ERROR", 500);
+
+
 // méthodes
 class APIController
 {
@@ -24,7 +30,7 @@ class APIController
     {
         http_response_code($statusCode);
         header("Content-Type: application/json");
-        echo json_encode($data);
+        Model::sendJSON($data);
     }
 
     public function getAllAnnonces($idAnnonces = null)
@@ -91,9 +97,8 @@ class APIController
                     Model::sendJSON($response);
                 }
             } catch (Exception $e) {
-                $response = ["error" => $e->getMessage()];
-                http_response_code(500);
-                $this->sendJSONResponse($response, 200);
+                http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+                $this->sendJSONResponse($response, HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -166,20 +171,21 @@ class APIController
         $formData = json_decode(file_get_contents('php://input'));
         if ($formData === null) {
             $error = "Aucunes données transmises dans le formulaire";
-            echo json_encode([$error]);
+            Model::sendJSON([$error]);
         } else {
             try {
                 $result = $this->apiManager->insertContactMessage($formData);
                 if ($result === true) {
                     $success = "Votre message a bien été envoyé";
-                    echo json_encode([$success]);
+                    Model::sendJSON([$success]);
                 } else {
                     $error = "Une erreur est survenue lors de l'envoi de votre message";
-                    echo json_encode([$error]);
+                    Model::sendJSON([$error]);
                 }
             } catch (Exception $e) {
-                $error = $e->getMessage();
-                echo json_encode([$error]);
+                http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+                $response = ["error" => $e->getMessage()];
+                $this->sendJSONResponse($response, HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -205,9 +211,9 @@ class APIController
                     Model::sendJSON($response);
                 }
             } catch (Exception $e) {
+                http_response_code(HTTP_INTERNAL_SERVER_ERROR);
                 $response = ["error" => $e->getMessage()];
-                http_response_code(500); // Erreur Serveur
-                $this->sendJSONResponse($response, 200);
+                $this->sendJSONResponse($response, HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }

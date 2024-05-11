@@ -15,8 +15,8 @@ class AdminController
 
     public function getPageAdmin()
     {
+        // Si l'utilisateur est authentifié, construit les données nécessaires à destination du front-end pour la page de connexion
         $baseUrl = getenv('BASE_URL');
-        // Construit les données nécessaires à destination du Frontpour la page de connexion
         $adminPageData = [
             'pageTitle' => 'Connexion',
             'formFields' => [
@@ -24,6 +24,7 @@ class AdminController
                 ['name' => 'password', 'label' => 'Mot de passe', 'type' => 'password']
             ],
             'actionUrl' => $baseUrl . 'admin', // URL de l'endpoint API pour la soumission du formulaire de connexion
+
         ];
         // Renvoie les données sous forme de JSON
         header('Content-Type: application/json');

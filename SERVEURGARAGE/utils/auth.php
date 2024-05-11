@@ -73,12 +73,12 @@ function requireAuth()
             return $userData;
         } else {
             http_response_code(401);
-            echo json_encode(["error" => "Le jeton JWT est invalide ou expiré"]);
+            Model::sendJSON(["error" => "Le jeton JWT est invalide ou expiré"]);
             exit();
         }
     } else {
         http_response_code(401);
-        echo json_encode(["error" => "Aucun jeton JWT trouvé dans l'en-tête Authorization"]);
+        Model::sendJSON(["error" => "Aucun jeton JWT trouvé dans l'en-tête Authorization"]);
         exit();
     }
 }

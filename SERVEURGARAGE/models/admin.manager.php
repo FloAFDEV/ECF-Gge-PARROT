@@ -74,7 +74,9 @@ class AdminManager extends Model
     public function getUserRoleByEmail($email)
     {
         try {
-            // var_dump($email);
+            if (!$email) {
+                throw new Exception("L'e-mail fourni est vide ou nul.");
+            }
             // Prépare et exécute la requête SQL pour obtenir le rôle de l'utilisateur par e-mail
             $stmt = $this->getBdd()->prepare("SELECT userRole FROM Users WHERE email = ?");
             $stmt->execute([$email]);
@@ -99,7 +101,6 @@ class AdminManager extends Model
             throw new Exception("Erreur lors de l'exécution de la requête SQL : " . $e->getMessage());
         }
     }
-
 
 
     // Vérifie si un utilisateur a le rôle requis
