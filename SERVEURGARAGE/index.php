@@ -290,9 +290,10 @@ switch ($url[0]) {
             case "admin":
                 // Vérification de la méthode de la requête
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Vérification des identifiants
+                    // var_dump($_POST);
                     $email = $_POST['email'];
                     $password = $_POST['password'];
+                    // Vérification des identifiants
                     $credentialsValid = $adminManager->checkCredentials($_POST['email'], $_POST['password']);
                     if ($credentialsValid) {
                         // Récupération de l'ID de l'utilisateur à partir de son e-mail
@@ -311,7 +312,6 @@ switch ($url[0]) {
                     }
                 } else {
                     // Vérification de l'authentification avec le middleware (utils/auth.php)
-                    require_once "./utils/auth.php";
                     $userData = requireAuth();
                     if (!$userData) {
                         // Si l'utilisateur n'est pas authentifié, renvoie une réponse d'erreur

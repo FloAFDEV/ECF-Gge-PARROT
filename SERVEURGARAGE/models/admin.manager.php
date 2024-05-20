@@ -20,10 +20,19 @@ class AdminManager extends Model
     }
 
     // Fonction pour hacher le mot de passe lors de l'inscription ou de la mise à jour
-    public function hashAndSavePassword($password)
+    public function hashAndSavePassword($email, $password)
     {
+        // Hache le mot de passe
         $hashedPassword = $this->hashPassword($password);
-        // Enregistre $hashedPassword dans la base de données
+        try {
+            // Met à jour le mot de passe haché dans la base de données
+            $stmt = $this->getBdd()->prepare("UPDATE Users SET password_hash = ? WHERE email = ?");
+            $stmt->execute([$hashedPassword, $email]);
+            // Retourne true si la mise à jour s'est bien déroulée
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Erreur dans la mise à jour du mot de passe");
+        }
     }
 
     // Fonction pour récupérer le mot de passe de l'utilisateur à partir de l'email
@@ -102,6 +111,14 @@ class AdminManager extends Model
         }
     }
 
+    //Recupere le nom de l'utolisateur 
+    public function getUserNameByEmail($email)
+    {
+        $stmt = $this->getBdd()->prepare("SELECT name FROM Users WHERE email = ?");
+        $stmt->execute([$email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['name'] : null;
+    }
 
     // Vérifie si un utilisateur a le rôle requis
     public function checkUserRole($email, $requiredRole)
@@ -132,25 +149,20 @@ class AdminManager extends Model
     // Vérifie les identifiants de connexion
     public function checkCredentials($email, $password)
     {
-        // Vérifie si les identifiants sont valides
-        $isValid = $this->isConnexionValid($email, $password);
-        // Si les identifiants ne sont pas valides, retourne false
-        if (!$isValid) {
-            return false;
+        try {
+            // Récupère le mot de passe haché de la base de données
+            $passwordBD = $this->getPasswordHashByEmail($email);
+            // Vérifie si le mot de passe haché existe
+            if ($passwordBD === null) {
+                throw new Exception("Aucun utilisateur trouvé avec l'email : $email");
+            }
+            // Hache le mot de passe entré par l'utilisateur
+            $hashedPassword = $this->hashPassword($password);
+            // Vérifie si le mot de passe haché correspond au mot de passe haché enregistré en base de données
+            return password_verify($password, $passwordBD);
+        } catch (Exception $e) {
+            // Gère les erreurs
+            throw new Exception("Erreur lors de la vérification des identifiants : " . $e->getMessage());
         }
-        // Si les identifiants sont valides, récupère le rôle de l'utilisateur
-        $userRole = $this->getUserRoleByEmail($email);
-        // Récupérer le mot de passe haché de la base de données
-        $passwordBD = $this->getPasswordHashByEmail($email);
-        // Vérifie si le mot de passe correspond au mot de passe haché avec bcrypt
-        $isValid = password_verify($password, $passwordBD);
-        // Si le mot de passe ne correspond pas, retourne false
-        if (!$isValid) {
-            return false;
-        }
-        // ID de l'utilisateur avant de l'utiliser
-        $userId = $this->getUserIdByEmail($email);
-        // Retourne true si les identifiants sont valides
-        return true;
     }
 }

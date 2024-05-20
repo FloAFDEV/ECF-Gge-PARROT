@@ -10,7 +10,7 @@ $adminManager = new AdminManager();
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once "./models/admin.manager.php";
 
-// Récupération de la clé secrète à partir des variables d'environnement
+// Récupére la clé secrète à partir des variables d'environnement
 $secretKey = getenv('SECRET_KEY');
 if ($secretKey === false) {
     // Cas où la variable d'environnement n'est pas définie
@@ -22,10 +22,15 @@ function generateAuthToken($email)
     global $adminManager, $secretKey;
     $userId = $adminManager->getUserIdByEmail($email);
     $userRole = $adminManager->getUserRoleByEmail($email);
+    $userName = $adminManager->getUserNameByEmail($email);
+    // var_dump("ID de l'utilisateur: ", $userId);
+    // var_dump("Role de l'utilisateur: ", $userRole);
+    // var_dump("Nome de l'utilisateur: ", $userName);
     // var_dump($userRole);
     $payload = [
         'user_id' => $userId,
         'email' => $email,
+        'name' => $userName,
         'userRole' => $userRole,
     ];
     $jwt = JWT::encode($payload, $secretKey, 'HS256');
@@ -37,18 +42,18 @@ function verifyJWT($jwt): ?stdClass
 {
     global $secretKey;
     try {
-        // Vérifier si le jeton JWT est vide
+        // Vérifie si le jeton JWT est vide
         if (!$jwt) {
             return null;
         }
-        // Décoder le jeton JWT
+        // Décode le jeton JWT
         $decoded = JWT::decode($jwt, $secretKey, $secretKey('HS256'));
         // var_dump($decoded);
         // Vérifier si le jeton JWT a expiré
         if (isset($decoded->exp) && $decoded->exp < time()) {
             throw new Exception("Le jeton JWT a expiré");
         }
-        // Retourner le jeton décodé
+        // Retourne le jeton décodé
         return $decoded;
     } catch (ExpiredException $e) {
         throw new Exception("Le jeton JWT a expiré : " . $e->getMessage());
