@@ -290,18 +290,20 @@ switch ($url[0]) {
             case "admin":
                 // Vérification de la méthode de la requête
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // var_dump($_POST);
-                    $email = $_POST['email'];
-                    $password = $_POST['password'];
+                    $formData = json_decode(file_get_contents('php://input'), true);
+                    // var_dump($formData);
+                    $email = $formData["email"];
+                    // var_dump($email);
+                    $password = $formData["password"];
                     // Vérification des identifiants
-                    $credentialsValid = $adminManager->checkCredentials($_POST['email'], $_POST['password']);
+                    $credentialsValid = $adminManager->checkCredentials($email, $password);
                     if ($credentialsValid) {
                         // Récupération de l'ID de l'utilisateur à partir de son e-mail
-                        $userId = $adminManager->getUserIdByEmail($_POST['email']);
+                        $userId = $adminManager->getUserIdByEmail($email);
                         // Récupération du rôle de l'utilisateur à partir de son e-mail
-                        $userRole = $adminManager->getUserRoleByEmail($_POST['email']);
+                        $userRole = $adminManager->getUserRoleByEmail($email);
                         // Génération d'un nouveau jeton JWT
-                        $token = generateAuthToken($_POST['email'], $userRole);
+                        $token = generateAuthToken($email, $userRole);
                         // Envoi du jeton dans le corps de la réponse JSON
                         http_response_code(200); // OK
                         Model::sendJSON(["token" => $token]);

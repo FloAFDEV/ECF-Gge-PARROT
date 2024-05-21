@@ -32,6 +32,8 @@ function generateAuthToken($email)
         'email' => $email,
         'name' => $userName,
         'userRole' => $userRole,
+        'iat' => time(),
+        'exp' => time() + (60 * 60)
     ];
     $jwt = JWT::encode($payload, $secretKey, 'HS256');
     return $jwt;
