@@ -16,6 +16,18 @@ if ($secretKey === false) {
     // Cas où la variable d'environnement n'est pas définie
     exit("La clé secrète n'est pas définie dans les variables d'environnement.");
 }
+
+// Définition des en-têtes CORS
+header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Pour gérer les requêtes pré-vol (OPTIONS)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 // Fonction pour générer un jeton d'authentification
 function generateAuthToken($email)
 {
