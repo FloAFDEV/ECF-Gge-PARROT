@@ -16,7 +16,7 @@ if ($secretKey === false) {
     // Cas où la variable d'environnement n'est pas définie
     exit("La clé secrète n'est pas définie dans les variables d'environnement.");
 }
-https: //afdevflo.alwaysdata.net/
+// https://afdevflo.alwaysdata.net/
 // Définition des en-têtes CORS
 header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");

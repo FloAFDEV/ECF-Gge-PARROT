@@ -1,14 +1,23 @@
-RewriteEngine On
+# Activer le moteur de réécriture
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+    # Si la demande n'est pas pour un fichier ou un répertoire existant
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
 
+    # Réécrire toutes les autres demandes vers index.php avec le paramètre "page"
+    RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+
+    # Gestion des requêtes OPTIONS pour CORS
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+</IfModule>
+
+# Définir les en-têtes CORS
 <IfModule mod_headers.c>
- Header set Access-Control-Allow-Origin "https://ggevparrot.vercel.app"
-     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Origin "https://ggevparrot.vercel.app"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "Content-Type, Authorization"
     Header set Access-Control-Allow-Credentials "true"
 </IfModule>
-
- 
