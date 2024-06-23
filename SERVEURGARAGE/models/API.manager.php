@@ -166,7 +166,6 @@ class APIManager extends Model
         }
     }
 
-
     public function getDBModels()
     {
         //requête pour Models
@@ -218,7 +217,6 @@ class APIManager extends Model
         return $garage;
     }
 
-
     // Mise en place d'une méthode commune pour exécuter la requête et récupérer toutes les données sans redondance (DRY) 
     private function executeAndFetchAll($req, $params = [])
     {
@@ -248,68 +246,6 @@ class APIManager extends Model
             // Gère les erreurs
             $error = ['error' => $e->getMessage()];
             return $error;
-        }
-    }
-
-    public function insertMessageAnnonce($Id_CarAnnonce, $formData)
-    {
-        // Vérification des propriétés de l'objet et définition des valeurs par défaut
-        $userName = isset($formData->userName) ? $formData->userName : '';
-        $userEmail = isset($formData->userEmail) ? $formData->userEmail : '';
-        $userPhone = isset($formData->userPhone) ? $formData->userPhone : '';
-        $message = isset($formData->message) ? $formData->message : '';
-        $createdAt = isset($formData->createdAt) ? $formData->createdAt : date('Y-m-d H:i:s'); // Date de création actuelle
-        // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
-        $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?)";
-        try {
-            // Préparation de la requête SQL
-            $stmt = $this->getBdd()->prepare($sql);
-            // Liaison des valeurs aux paramètres de la requête
-            $stmt->bindParam(1, $userName, PDO::PARAM_STR);
-            $stmt->bindParam(2, $userEmail, PDO::PARAM_STR);
-            $stmt->bindParam(3, $userPhone, PDO::PARAM_STR);
-            $stmt->bindParam(4, $message, PDO::PARAM_STR);
-            $stmt->bindParam(5, $createdAt, PDO::PARAM_STR);
-            $stmt->bindParam(6, $Id_CarAnnonce, PDO::PARAM_INT);
-            // Exécution de la requête
-            $stmt->execute();
-            // Retourne true si l'insertion est réussie
-            return $stmt->rowCount() > 0;
-        } catch (PDOException $e) {
-            // Gestion des erreurs et enregistrement dans le journal des erreurs
-            error_log("Error in insertMessageAnnonce: " . $e->getMessage());
-            // Retourne false si l'insertion a échoué
-            return false;
-        }
-    }
-
-
-    public function insertContactMessage($formData)
-    {
-        $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
-        try {
-            $stmt = $this->getBdd()->prepare($req);
-            // Valide et échappe les données
-            $name = substr($formData->name, 0, 255); // Limiterla longueur du champ à 255 caractères
-            $email = filter_var($formData->email, FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
-            $phone = preg_replace("/[^0-9]/", "", $formData->phone); // Supprime les caractères non numériques
-            $message = substr($formData->message, 0, 1000); // Limite la longueur du champ à 1000 caractères
-            // Vérification de la validité de l'e-mail
-            if (!$email) {
-                return false; // Retourne false si l'e-mail est invalide
-            }
-            // Exécute de la requête avec les valeurs des champs
-            $stmt->execute([$name, $email, $phone, $message]);
-            // Vérification du nombre de lignes affectées pour s'assurer que l'insertion s'est bien déroulée
-            if ($stmt->rowCount() > 0) {
-                return true; // Retourne true si l'insertion a réussi
-            } else {
-                return false; // Retourne false si aucune ligne n'a été insérée
-            }
-        } catch (PDOException $e) {
-            error_log("Error in insertContactMessage: " . $e->getMessage());
-            // Retourne false si une exception PDO est levée
-            return false;
         }
     }
 
@@ -442,5 +378,246 @@ class APIManager extends Model
         );
         // Exécute la requête et retournez le résultat
         return $this->executeAndFetchAll($req, $params);
+    }
+
+    // Méthode pour insérer un message global
+    public function insertMessageAnnonce($Id_CarAnnonce, $formData)
+    {
+        // Vérification des propriétés de l'objet et définition des valeurs par défaut
+        $userName = isset($formData->userName) ? $formData->userName : '';
+        $userEmail = isset($formData->userEmail) ? $formData->userEmail : '';
+        $userPhone = isset($formData->userPhone) ? $formData->userPhone : '';
+        $message = isset($formData->message) ? $formData->message : '';
+        $createdAt = isset($formData->createdAt) ? $formData->createdAt : date('Y-m-d H:i:s'); // Date de création actuelle
+        // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
+        $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?)";
+        try {
+            // Préparation de la requête SQL
+            $stmt = $this->getBdd()->prepare($sql);
+            // Liaison des valeurs aux paramètres de la requête
+            $stmt->bindParam(1, $userName, PDO::PARAM_STR);
+            $stmt->bindParam(2, $userEmail, PDO::PARAM_STR);
+            $stmt->bindParam(3, $userPhone, PDO::PARAM_STR);
+            $stmt->bindParam(4, $message, PDO::PARAM_STR);
+            $stmt->bindParam(5, $createdAt, PDO::PARAM_STR);
+            $stmt->bindParam(6, $Id_CarAnnonce, PDO::PARAM_INT);
+            // Exécution de la requête
+            $stmt->execute();
+            // Retourne true si l'insertion est réussie
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            // Gestion des erreurs et enregistrement dans le journal des erreurs
+            error_log("Error in insertMessageAnnonce: " . $e->getMessage());
+            // Retourne false si l'insertion a échoué
+            return false;
+        }
+    }
+
+    public function insertContactMessage($formData)
+    {
+        $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
+        try {
+            $stmt = $this->getBdd()->prepare($req);
+            // Valide et échappe les données
+            $name = substr($formData->name, 0, 255); // Limiterla longueur du champ à 255 caractères
+            $email = filter_var($formData->email, FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
+            $phone = preg_replace("/[^0-9]/", "", $formData->phone); // Supprime les caractères non numériques
+            $message = substr($formData->message, 0, 1000); // Limite la longueur du champ à 1000 caractères
+            // Vérification de la validité de l'e-mail
+            if (!$email) {
+                return false; // Retourne false si l'e-mail est invalide
+            }
+            // Exécute de la requête avec les valeurs des champs
+            $stmt->execute([$name, $email, $phone, $message]);
+            // Vérification du nombre de lignes affectées pour s'assurer que l'insertion s'est bien déroulée
+            if ($stmt->rowCount() > 0) {
+                return true; // Retourne true si l'insertion a réussi
+            } else {
+                return false; // Retourne false si aucune ligne n'a été insérée
+            }
+        } catch (PDOException $e) {
+            error_log("Error in insertContactMessage: " . $e->getMessage());
+            // Retourne false si une exception PDO est levée
+            return false;
+        }
+    }
+
+    // Méthode pour créer une annonce
+    public function createAnnonce($annonceData)
+    {
+        try {
+            // Démarre une transaction
+            $this->getBdd()->beginTransaction();
+            // Requête pour insérer dans la table CarAnnonce
+            $reqAnnonce = "INSERT INTO CarAnnonce (title, createdAt, valid, Id_Garage) VALUES (:title, :createdAt, :valid, :Id_Garage)";
+            $stmtAnnonce = $this->getBdd()->prepare($reqAnnonce);
+            $stmtAnnonce->execute([
+                ':title' => $annonceData['annonce_title'],
+                ':createdAt' => $annonceData['annonce_createdAt'],
+                ':valid' => $annonceData['annonce_valid'],
+                ':Id_Garage' => $annonceData['Id_Garage']
+            ]);
+            // Récupère l'ID de l'annonce insérée
+            $annonceId = $this->getBdd()->lastInsertId();
+            // Requête pour insérer dans la table Cars
+            $reqCar = "INSERT INTO Cars (mileage, registration, price, description, main_image_url, power, power_unit, color, Id_CarAnnonce) 
+                VALUES (:mileage, :registration, :price, :description, :main_image_url, :power, :power_unit, :color, :Id_CarAnnonce)";
+            $stmtCar = $this->getBdd()->prepare($reqCar);
+            $stmtCar->execute([
+                ':mileage' => $annonceData['mileage'],
+                ':registration' => $annonceData['registration'],
+                ':price' => $annonceData['price'],
+                ':description' => $annonceData['description'],
+                ':main_image_url' => $annonceData['main_image_url'],
+                ':power' => $annonceData['power'],
+                ':power_unit' => $annonceData['power_unit'],
+                ':color' => $annonceData['color'],
+                ':Id_CarAnnonce' => $annonceId
+            ]);
+            // Récupère l'ID de la voiture insérée
+            $carId = $this->getBdd()->lastInsertId();
+            // Requête pour insérer dans la table CarsEnergy
+            $reqEnergy = "INSERT INTO CarsEnergy (Id_Cars, Id_EnergyType) VALUES (:Id_Cars, :Id_EnergyType)";
+            $stmtEnergy = $this->getBdd()->prepare($reqEnergy);
+            $stmtEnergy->execute([
+                ':Id_Cars' => $carId,
+                ':Id_EnergyType' => $annonceData['Id_EnergyType']
+            ]);
+            // Requête pour insérer dans la table Models
+            $reqModels = "INSERT INTO Models (model_name, category_model, Id_Brand, Id_Cars) VALUES (:model_name, :category_model, :Id_Brand, :Id_Cars)";
+            $stmtModels = $this->getBdd()->prepare($reqModels);
+            $stmtModels->execute([
+                ':model_name' => $annonceData['model_name'],
+                ':category_model' => $annonceData['category_model'],
+                ':Id_Brand' => $annonceData['Id_Brand'],
+                ':Id_Cars' => $carId
+            ]);
+            // Récupère l'ID du modèle inséré
+            $modelId = $this->getBdd()->lastInsertId();
+
+            // Requête pour insérer dans la table ModelsManufactureYears
+            $reqManufactureYears = "INSERT INTO ModelsManufactureYears (Id_Model, Id_ManufactureYears) VALUES (:Id_Model, :Id_ManufactureYears)";
+            $stmtManufactureYears = $this->getBdd()->prepare($reqManufactureYears);
+            $stmtManufactureYears->execute([
+                ':Id_Model' => $modelId,
+                ':Id_ManufactureYears' => $annonceData['manufacture_year']
+            ]);
+            // Valide la transaction
+            $this->getBdd()->commit();
+            // Retourne true si tout s'est bien passé
+            return true;
+        } catch (PDOException $e) {
+            // En cas d'erreur, annule la transaction
+            $this->getBdd()->rollBack();
+            error_log("Error in createAnnonce: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    // Méthode pour mettre à jour une annonce
+    public function updateAnnonce($id, $annonceData)
+    {
+        try {
+            $this->getBdd()->beginTransaction();
+            // Met à jour la table CarAnnonce
+            $reqAnnonce = "UPDATE CarAnnonce SET title = :title, createdAt = :createdAt, valid = :valid, Id_Garage = :Id_Garage WHERE Id_CarAnnonce = :id";
+            $stmtAnnonce = $this->getBdd()->prepare($reqAnnonce);
+            $stmtAnnonce->execute([
+                ':title' => $annonceData['annonce_title'],
+                ':createdAt' => $annonceData['annonce_createdAt'],
+                ':valid' => $annonceData['annonce_valid'],
+                ':Id_Garage' => $annonceData['Id_Garage'],
+                ':id' => $id
+            ]);
+            // Met à jour la table Cars
+            $reqCar = "UPDATE Cars SET mileage = :mileage, registration = :registration, price = :price, description = :description, main_image_url = :main_image_url, power = :power, power_unit = :power_unit, color = :color WHERE Id_CarAnnonce = :id";
+            $stmtCar = $this->getBdd()->prepare($reqCar);
+            $stmtCar->execute([
+                ':mileage' => $annonceData['mileage'],
+                ':registration' => $annonceData['registration'],
+                ':price' => $annonceData['price'],
+                ':description' => $annonceData['description'],
+                ':main_image_url' => $annonceData['main_image_url'],
+                ':power' => $annonceData['power'],
+                ':power_unit' => $annonceData['power_unit'],
+                ':color' => $annonceData['color'],
+                ':id' => $id
+            ]);
+            // Mettre à jour la table CarsEnergy
+            $reqEnergy = "UPDATE CarsEnergy SET Id_EnergyType = :Id_EnergyType WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
+            $stmtEnergy = $this->getBdd()->prepare($reqEnergy);
+            $stmtEnergy->execute([
+                ':Id_EnergyType' => $annonceData['Id_EnergyType'],
+                ':id' => $id
+            ]);
+
+            $this->getBdd()->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->getBdd()->rollBack();
+            error_log("Error in updateAnnonce: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Méthode pour supprimer une annonce
+    public function deleteAnnonce($id)
+    {
+        try {
+            $this->getBdd()->beginTransaction();
+            // Supprime les enregistrements de la table CarsOptions liés à cette annonce
+            $reqOptions = "DELETE FROM CarsOptions WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
+            $stmtOptions = $this->getBdd()->prepare($reqOptions);
+            $stmtOptions->execute([':id' => $id]);
+            // Supprime les enregistrements de la table CarsEnergy liés à cette annonce
+            $reqEnergy = "DELETE FROM CarsEnergy WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
+            $stmtEnergy = $this->getBdd()->prepare($reqEnergy);
+            $stmtEnergy->execute([':id' => $id]);
+            // Supprime les enregistrements de la table Cars liés à cette annonce
+            $reqCar = "DELETE FROM Cars WHERE Id_CarAnnonce = :id";
+            $stmtCar = $this->getBdd()->prepare($reqCar);
+            $stmtCar->execute([':id' => $id]);
+            // Supprime l'annonce de la table CarAnnonce
+            $reqAnnonce = "DELETE FROM CarAnnonce WHERE Id_CarAnnonce = :id";
+            $stmtAnnonce = $this->getBdd()->prepare($reqAnnonce);
+            $stmtAnnonce->execute([':id' => $id]);
+            $this->getBdd()->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->getBdd()->rollBack();
+            error_log("Error in deleteAnnonce: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateValidationStatus($annonceId, $newValidity)
+    {
+        // Prépare la requête SQL pour mettre à jour le statut de validation dans la table CarAnnonce
+        $query = "UPDATE CarAnnonce SET valid = :status WHERE Id_CarAnnonce = :id";
+        try {
+            // Prépare la requête SQL
+            $stmt = $this->getBdd()->prepare($query);
+            // Journalise l'ID de l'annonce et la nouvelle validité pour le suivi et le débogage
+            error_log("Annonce ID: " . $annonceId);
+            error_log("New Validity: " . $newValidity);
+            // Lie les valeurs aux paramètres de la requête SQL
+            $stmt->bindValue(':id', $annonceId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $newValidity, PDO::PARAM_INT);
+            // Journalise la requête SQL pour le suivi et le débogage
+            error_log("SQL Query: " . $query);
+            // Exécute la requête SQL préparée
+            $stmt->execute();
+            // Vérifie le nombre de lignes affectées par la mise à jour
+            $rowCount = $stmt->rowCount();
+            // Journalise le nombre de lignes affectées pour le suivi
+            error_log("Rows affected: " . $rowCount);
+            // Retourne vrai si au moins une ligne a été mise à jour avec succès, sinon retourne faux
+            return $rowCount > 0;
+        } catch (PDOException $e) {
+            // Gère les erreurs PDO, les journalise pour le suivi et retourne faux en cas d'erreur
+            error_log("Error in updateValidationStatus: " . $e->getMessage());
+            return false;
+        }
     }
 }

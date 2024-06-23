@@ -62,7 +62,7 @@ $allowedActions = [
     "cars", "models", "brands", "garage", "images",
     "testimonials", "opening", "services", "options",
     "years", "energy", "annonces", "contact_message",
-    "users", "message_annonce", "password", "admin",
+    "users", "message_annonce", "password", "admin", "validite",
 ];
 if (!in_array($url[1], $allowedActions)) {
     throw new Exception("Oups! cette action n'éxiste pas");
@@ -72,13 +72,18 @@ switch ($url[0]) {
         switch ($url[1]) {
             case "annonces":
                 if (isset($url[2]) && is_numeric($url[2])) {
-                    $apiController->getAnnonceByID($url[2]);
+                    if ($_SERVER['REQUEST_METHOD'] === 'PUT' && isset($url[3]) && $url[3] === 'validite') {
+                        // Récupére le statut de validité depuis les données POST
+                        $data = json_decode(file_get_contents("php://input"), true);
+                        $newValidity = $data['valid'];
+                        // Appele la méthode updateValidationStatus avec l'ID de l'annonce et le nouveau statut de validité
+                        $apiController->updateValidationStatus($url[2], $newValidity);
+                    } else {
+                        $apiController->getAnnonceByID($url[2]);
+                    }
                 } elseif (!isset($url[2])) {
-                    // Gérer le cas où aucun identifiant n'est fourni
-                    // Cela peut inclure la logique pour récupérer toutes les voitures
                     $apiController->getAllAnnonces();
                 } else {
-                    // Gérer le cas où l'identifiant n'est pas un nombre valide
                     throw new Exception("Identifiant du véhicule invalide");
                 }
                 break;

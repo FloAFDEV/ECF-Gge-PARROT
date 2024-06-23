@@ -18,7 +18,7 @@ if ($secretKey === false) {
 }
 // https://afdevflo.alwaysdata.net/
 // Définition des en-têtes CORS
-header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
+header("Access-Control-Allow-Origin:  https://ggevparrot.vercel.app");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -45,7 +45,7 @@ function generateAuthToken($email)
         'name' => $userName,
         'userRole' => $userRole,
         'iat' => time(),
-        'exp' => time() + (60 * 60)
+        'exp' => time() + (2 * 60 * 60)
     ];
     $jwt = JWT::encode($payload, $secretKey, 'HS256');
     return $jwt;

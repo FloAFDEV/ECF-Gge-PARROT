@@ -217,4 +217,113 @@ class APIController
             }
         }
     }
+
+    public function createAnnonce()
+    {
+        header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
+        $formData = json_decode(file_get_contents('php://input'));
+        if ($formData === null) {
+            http_response_code(400); // Mauvaise requête
+            Model::sendJSON(["error" => "Aucune donnée valide transmise dans le formulaire"]);
+        } else {
+            try {
+                // Utilisation de addAnnonce pour ajouter une nouvelle annonce
+                $result = $this->apiManager->createAnnonce($formData);
+                if ($result === true) {
+                    http_response_code(200); // OK
+                    Model::sendJSON(["success" => "L'annonce a bien été ajoutée"]);
+                } else {
+                    $response = ["error" => "Une erreur est survenue lors de l'ajout de l'annonce"];
+                    http_response_code(500); // Erreur Serveur
+                    Model::sendJSON($response);
+                }
+            } catch (Exception $e) {
+                http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+                $response = ["error" => $e->getMessage()];
+                $this->sendJSONResponse($response, HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    public function updateAnnonce($id)
+    {
+        header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
+        $formData = json_decode(file_get_contents('php://input'));
+        if ($formData === null) {
+            http_response_code(400); // Mauvaise requête
+            Model::sendJSON(["error" => "Aucune donnée valide transmise dans le formulaire"]);
+        } else {
+            try {
+                // Utilisation de updateAnnonce pour mettre à jour une annonce par ID
+                $result = $this->apiManager->updateAnnonce($id, $formData);
+                if ($result === true) {
+                    http_response_code(200); // OK
+                    Model::sendJSON(["success" => "L'annonce a bien été mise à jour"]);
+                } else {
+                    $response = ["error" => "Une erreur est survenue lors de la mise à jour de l'annonce"];
+                    http_response_code(500); // Erreur Serveur
+                    Model::sendJSON($response);
+                }
+            } catch (Exception $e) {
+                http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+                $response = ["error" => $e->getMessage()];
+                $this->sendJSONResponse($response, HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    public function deleteAnnonce($id)
+    {
+        // Ajoute les en-têtes CORS nécessaires pour permettre les requêtes cross-origin
+        header("Access-Control-Allow-Headers: Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization");
+        try {
+            // Utilise apiManager pour supprimer une annonce par ID
+            $result = $this->apiManager->deleteAnnonce($id);
+            // Si la suppression réussit
+            if ($result === true) {
+                http_response_code(200); // OK
+                Model::sendJSON(["success" => "L'annonce a bien été supprimée"]);
+            } else {
+                // Si la suppression échoue
+                $response = ["error" => "Une erreur est survenue lors de la suppression de l'annonce"];
+                http_response_code(500); // Erreur Serveur
+                Model::sendJSON($response);
+            }
+        } catch (Exception $e) {
+            // Gère les exceptions
+            http_response_code(500); // Erreur Serveur
+            $response = ["error" => $e->getMessage()];
+            Model::sendJSON($response);
+        }
+    }
+
+    public function updateValidationStatus($annonceId, $newValidity)
+    {
+        // Journalise l'appel à la fonction pour suivre l'exécution
+        error_log("Appel à updateValidationStatus dans APIController");
+        // Journalise l'ID de l'annonce et la nouvelle validité pour le suivi
+        error_log("Annonce ID: " . $annonceId);
+        error_log("New Validity: " . $newValidity);
+        // Appelle la méthode de mise à jour dans le gestionnaire (manager)
+        $success = $this->apiManager->updateValidationStatus($annonceId, $newValidity);
+        // Journalise le succès ou l'échec de la mise à jour
+        error_log("Update Success: " . ($success ? "true" : "false"));
+        if ($success) {
+            // Si la mise à jour a réussi, récupère les données mises à jour après la mise à jour dans la base de données
+            $updatedData = $this->apiManager->getAnnonceById($annonceId);
+            if ($updatedData) {
+                // Si les données mises à jour sont disponibles, retourne une réponse JSON avec les données mises à jour
+                http_response_code(200); // OK
+                Model::sendJSON($updatedData);
+            } else {
+                // Gère le cas où les données mises à jour ne sont pas disponibles
+                http_response_code(404); // Not Found
+                Model::sendJSON(["error" => "Annonce mise à jour introuvable"]);
+            }
+        } else {
+            // SI la mise à jour a échoué
+            http_response_code(500); // Internal Server Error
+            Model::sendJSON(["error" => "Erreur lors de la mise à jour du statut de validité"]);
+        }
+    }
 }
