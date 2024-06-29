@@ -114,6 +114,20 @@ class APIController
         }
     }
 
+    public function getDBTestimonialId($testimonialId)
+    {
+        try {
+            $validTestimonials = $this->apiManager->getDBTestimonialId($testimonialId);
+            $this->sendJSONResponse($validTestimonials, HTTP_OK);
+        } catch (PDOException $e) {
+            http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+            $this->sendJSONResponse(["error" => "Database error: " . $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception $e) {
+            http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+            $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function insertTestimonial()
     {
         try {
@@ -124,6 +138,7 @@ class APIController
                 return;
             }
             $result = $this->apiManager->insertTestimonial($formData);
+            var_dump($result);
             if ($result === true) {
                 $this->sendJSONResponse(["success" => "Votre témoignage a bien été enregistré"], HTTP_OK);
             } else {
@@ -136,49 +151,53 @@ class APIController
         }
     }
 
-    public function updateTestimonialValidation()
+    public function updateTestimonialValidation($testimonialId, $newValidity)
     {
         try {
-            $data = json_decode(file_get_contents("php://input"), true);
-            if (!isset($data['testimonialId']) || !isset($data['valid'])) {
+            if (!isset($testimonialId) || !isset($newValidity)) {
                 http_response_code(HTTP_BAD_REQUEST);
                 $this->sendJSONResponse(["error" => "Données invalides"], HTTP_BAD_REQUEST);
                 return;
             }
-            $result = $this->apiManager->insertTestimonial($data['testimonialId'], $data['valid']);
+            $result = $this->apiManager->updateTestimonialValidation($testimonialId, $newValidity);
+            var_dump($result);
             if ($result) {
                 $this->sendJSONResponse(["message" => "Témoignage mis à jour avec succès"], HTTP_OK);
+                return true;
             } else {
                 http_response_code(HTTP_INTERNAL_SERVER_ERROR);
                 $this->sendJSONResponse(["error" => "Échec de la mise à jour du témoignage"], HTTP_INTERNAL_SERVER_ERROR);
+                return false;
             }
         } catch (Exception $e) {
             http_response_code(HTTP_INTERNAL_SERVER_ERROR);
             $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+            return false;
         }
     }
 
-    public function deleteTestimonial()
+
+    public function deleteTestimonial($testimonialId)
     {
         try {
-            $data = json_decode(file_get_contents("php://input"), true);
-            if (!isset($data['Id_Testimonials'])) {
+            if (!isset($testimonialId)) {
                 http_response_code(HTTP_BAD_REQUEST);
                 $this->sendJSONResponse(["error" => "Données incomplètes pour la suppression du témoignage"], HTTP_BAD_REQUEST);
                 return;
             }
-
-            $testimonialId = $data['Id_Testimonials'];
             $result = $this->apiManager->deleteTestimonial($testimonialId);
             if ($result) {
                 $this->sendJSONResponse(["message" => "Témoignage supprimé avec succès"], HTTP_OK);
+                return true;
             } else {
                 http_response_code(HTTP_INTERNAL_SERVER_ERROR);
                 $this->sendJSONResponse(["error" => "Échec de la suppression du témoignage"], HTTP_INTERNAL_SERVER_ERROR);
+                return false;
             }
         } catch (Exception $e) {
             http_response_code(HTTP_INTERNAL_SERVER_ERROR);
             $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+            return false;
         }
     }
 
@@ -270,22 +289,23 @@ class APIController
         }
     }
 
-    public function getContactMessage()
-    {
-        try {
-            $password = $this->apiManager->getDBContactMessage();
-            $this->sendJSONResponse($password, HTTP_OK);
-        } catch (Exception $e) {
-            http_response_code(HTTP_INTERNAL_SERVER_ERROR);
-            $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
     public function getUsers()
     {
         try {
             $users = $this->apiManager->getDBUsers();
             $this->sendJSONResponse($users, HTTP_OK);
+        } catch (Exception $e) {
+            http_response_code(HTTP_INTERNAL_SERVER_ERROR);
+            $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getContactMessage()
+    {
+        try {
+            $password = $this->apiManager->getDBContactMessage();
+            $this->sendJSONResponse($password, HTTP_OK);
         } catch (Exception $e) {
             http_response_code(HTTP_INTERNAL_SERVER_ERROR);
             $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
@@ -301,7 +321,6 @@ class APIController
                 $this->sendJSONResponse(["error" => "Aucunes données transmises dans le formulaire"], HTTP_BAD_REQUEST);
                 return;
             }
-
             $result = $this->apiManager->insertContactMessage($formData);
             if ($result === true) {
                 $this->sendJSONResponse(["success" => "Votre message a bien été envoyé"], HTTP_OK);
@@ -348,7 +367,6 @@ class APIController
                 $this->sendJSONResponse(["error" => "Aucune donnée valide transmise dans le formulaire"], HTTP_BAD_REQUEST);
                 return;
             }
-
             $result = $this->apiManager->createAnnonce($formData);
             if ($result === true) {
                 $this->sendJSONResponse(["success" => "L'annonce a bien été ajoutée"], HTTP_OK);
@@ -385,19 +403,27 @@ class APIController
         }
     }
 
-    public function deleteAnnonce($id)
+    public function deleteAnnonce($annonceId)
     {
         try {
-            $result = $this->apiManager->deleteAnnonce($id);
-            if ($result === true) {
-                $this->sendJSONResponse(["success" => "L'annonce a bien été supprimée"], HTTP_OK);
+            if (!isset($annonceId)) {
+                http_response_code(HTTP_BAD_REQUEST);
+                $this->sendJSONResponse(["error" => "Données incomplètes pour la suppression de l'annonce"], HTTP_BAD_REQUEST);
+                return;
+            }
+            $result = $this->apiManager->deleteAnnonce($annonceId);
+            if ($result) {
+                $this->sendJSONResponse(["message" => "Annonce supprimé avec succès"], HTTP_OK);
+                return true;
             } else {
                 http_response_code(HTTP_INTERNAL_SERVER_ERROR);
-                $this->sendJSONResponse(["error" => "Une erreur est survenue lors de la suppression de l'annonce"], HTTP_INTERNAL_SERVER_ERROR);
+                $this->sendJSONResponse(["error" => "Échec de la suppression de l'annonce"], HTTP_INTERNAL_SERVER_ERROR);
+                return false;
             }
         } catch (Exception $e) {
             http_response_code(HTTP_INTERNAL_SERVER_ERROR);
             $this->sendJSONResponse(["error" => $e->getMessage()], HTTP_INTERNAL_SERVER_ERROR);
+            return false;
         }
     }
 

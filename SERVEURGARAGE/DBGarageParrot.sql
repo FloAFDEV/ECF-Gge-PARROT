@@ -11,6 +11,7 @@ USE DBGarageParrot;
 DROP TABLE IF EXISTS ModelsManufactureYears, CarsEnergy, CarsOptions, Models, Images, MessageAnnonce, Cars, ResetPassword, GarageServices, CarAnnonce, Testimonials, Users, EnergyType, ManufactureYears, Brands, Opening, Garage, Options;
 
 -- Création de la table Options / Relation N.N entre Cars et Options (à travers la table intermédiaire CarsOptions) 
+-- Ajout de "ALTER TABLE `CarsOptions` DROP FOREIGN KEY `carsoptions_ibfk_1`; ALTER TABLE `CarsOptions` ADD CONSTRAINT `carsoptions_ibfk_1` FOREIGN KEY (`Id_Cars`) REFERENCES `Cars`(`Id_Cars`) ON DELETE CASCADE ON UPDATE CASCADE;" A POSTERIORI
 CREATE TABLE Options
 (
     Id_Options   INT AUTO_INCREMENT PRIMARY KEY,
@@ -157,6 +158,7 @@ CREATE TABLE ResetPassword
 -- Création de la table Cars / Relation 1:N entre Models et Cars & Relation N.N entre Cars et EnergyType (à travers la table intermédiaire CarsEnergy) 
 -- Relation N.N entre Cars et Options (à travers la table intermédiaire CarsOptions) 
 -- Relation 1.N entre Cars et CarAnnonce 
+-- Ajout de ALTER TABLE `Cars` DROP FOREIGN KEY `cars_ibfk_1`; ALTER TABLE `Cars` ADD CONSTRAINT `cars_ibfk_1` FOREIGN KEY (`Id_CarAnnonce`) REFERENCES `CarAnnonce`(`Id_CarAnnonce`) ON DELETE CASCADE ON UPDATE CASCADE; APOSTERIORI
 CREATE TABLE Cars
 (
     Id_Cars        INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,6 +195,7 @@ CREATE TABLE MessageAnnonce
   COLLATE = utf8mb4_unicode_ci;
 
 -- Création de la nouvelle table Images / Relation 1:N entre CarAnnonce et Images 
+-- Ajout de ALTER TABLE `Images` DROP FOREIGN KEY `images_ibfk_1`; ALTER TABLE `Images` ADD CONSTRAINT `images_ibfk_1` FOREIGN KEY (`Id_CarAnnonce`) REFERENCES `CarAnnonce`(`Id_CarAnnonce`) ON DELETE CASCADE ON UPDATE CASCADE; A POSTERIORI
 CREATE TABLE Images
 (
     Id_Image      INT AUTO_INCREMENT PRIMARY KEY,
@@ -207,6 +210,7 @@ CREATE TABLE Images
 -- Création de la table Models (Modèles) / Relation 1:N entre Models et Cars 
 -- Relation 1:N entre Models et Brands 
 -- Relation N.N entre Models et ManufactureYears (à travers la table intermédiaire ModelsManufactureYears) 
+-- Ajout de ALTER TABLE `Models` DROP FOREIGN KEY `models_ibfk_1`; ALTER TABLE `Models` ADD CONSTRAINT `models_ibfk_1` FOREIGN KEY (`Id_Cars`) REFERENCES `Cars`(`Id_Cars`) ON DELETE CASCADE ON UPDATE CASCADE; A POSTERIORI
 CREATE TABLE Models
 (
     Id_Model       INT AUTO_INCREMENT PRIMARY KEY,
@@ -231,6 +235,7 @@ CREATE TABLE CarsOptions
 ) ENGINE = InnoDB;
 
 -- Création de la table CarsEnergy / Relation N.N entre Cars et EnergyType (à travers la table intermédiaire CarsEnergy) 
+-- Ajout de ALTER TABLE `CarsEnergy` DROP FOREIGN KEY `carsenergy_ibfk_2`; ALTER TABLE `CarsEnergy` ADD CONSTRAINT `carsenergy_ibfk_2` FOREIGN KEY (`Id_Cars`) REFERENCES `Cars`(`Id_Cars`) ON DELETE CASCADE ON UPDATE CASCADE; A POSTERIORI
 CREATE TABLE CarsEnergy
 (
     Id_EnergyType INT,

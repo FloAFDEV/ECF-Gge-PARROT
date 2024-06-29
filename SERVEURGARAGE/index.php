@@ -60,8 +60,8 @@ if (!isset($url[0]) || !isset($url[1])) {
 }
 $allowedActions = [
     "cars", "models", "brands", "garage", "images",
-    "testimonials", "opening", "services", "options",
-    "years", "energy", "annonces", "contact_message",
+    "testimonials", "testimonial", "opening", "services", "options",
+    "years", "energy", "annonces", "annonce", "contact_message",
     "users", "message_annonce", "password", "admin", "validite",
 ];
 if (!in_array($url[1], $allowedActions)) {
@@ -85,6 +85,34 @@ switch ($url[0]) {
                     $apiController->getAllAnnonces();
                 } else {
                     throw new Exception("Identifiant du véhicule invalide");
+                }
+                break;
+            case "annonce":
+                switch ($url[2]) {
+                    case ($_SERVER['REQUEST_METHOD'] === 'GET'):
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            // var_dump($url[2]);
+                            $apiController->getAllAnnonces($url[2]);
+                        }
+                        break;
+                    case ($_SERVER['REQUEST_METHOD'] === 'DELETE'):
+                        error_log('DELETE request received for annonces');
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            $annonceId = $url[2];
+                            // Suppression du témoignage
+                            $deleteSuccess = $apiController->deleteAnnonce($annonceId);
+                            if ($deleteSuccess) {
+                                http_response_code(200);
+                                return Model::sendJSON(["message" => "Annonce supprimé avec succès"]);
+                            } else {
+                                http_response_code(500);
+                                return Model::sendJSON(["error" => "Échec de la suppression de l'annonce"]);
+                            }
+                        } else {
+                            http_response_code(400);
+                            return Model::sendJSON(["error" => "Données incomplètes pour la suppression de l'annonce"]);
+                        }
+                        break;
                 }
                 break;
             case "cars":
@@ -157,6 +185,57 @@ switch ($url[0]) {
                     throw new Exception("Méthode non autorisée");
                 }
                 break;
+            case "testimonial":
+                var_dump($_SERVER['REQUEST_METHOD']);
+                switch ($url[2]) {
+                    case ($_SERVER['REQUEST_METHOD'] === 'GET'):
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            // var_dump($url[2]);
+                            $apiController->getDBTestimonialId($url[2]);
+                        }
+                        break;
+                    case ($_SERVER['REQUEST_METHOD'] === 'PUT'):
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            $data = json_decode(file_get_contents("php://input"), true);
+                            error_log('PUT data: ' . print_r($data, true));
+                            if (isset($data['valid'])) {
+                                $testimonialId = $url[2];
+                                $newValidity = $data['valid'];
+                                $updateSuccess = $apiController->updateTestimonialValidation($testimonialId, $newValidity);
+                                var_dump($updateSuccess);
+                                if ($updateSuccess) {
+                                    http_response_code(200);
+                                    return   Model::sendJSON(["message" => "Statut de validation du témoignage mis à jour avec succès"]);
+                                } else {
+                                    http_response_code(500);
+                                    return  Model::sendJSON(["error" => "Échec de la mise à jour du statut de validation du témoignage"]);
+                                }
+                            } else {
+                                http_response_code(400);
+                                return Model::sendJSON(["error" => "Données incomplètes pour la mise à jour du statut de validation du témoignage"]);
+                            }
+                        }
+                        break;
+                    case ($_SERVER['REQUEST_METHOD'] === 'DELETE'):
+                        error_log('DELETE request received for testimonials');
+                        if (isset($url[2]) && is_numeric($url[2])) {
+                            $testimonialId = $url[2];
+                            // Suppression du témoignage
+                            $deleteSuccess = $apiController->deleteTestimonial($testimonialId);
+                            if ($deleteSuccess) {
+                                http_response_code(200);
+                                return Model::sendJSON(["message" => "Témoignage supprimé avec succès"]);
+                            } else {
+                                http_response_code(500);
+                                return Model::sendJSON(["error" => "Échec de la suppression du témoignage"]);
+                            }
+                        } else {
+                            http_response_code(400);
+                            return Model::sendJSON(["error" => "Données incomplètes pour la suppression du témoignage"]);
+                        }
+                        break;
+                }
+                break;
             case "testimonials":
                 switch ($_SERVER['REQUEST_METHOD']) {
                     case 'GET':
@@ -164,48 +243,6 @@ switch ($url[0]) {
                         break;
                     case 'POST':
                         $apiController->insertTestimonial();
-                        break;
-                    case 'PUT':
-                        error_log('PUT request received for testimonials');
-                        $data = json_decode(file_get_contents("php://input"), true);
-                        error_log('PUT data: ' . print_r($data, true));
-                        if (isset($data['valid'], $data['testimonialId'])) {
-                            $testimonialId = $data['testimonialId'];
-                            $newValidity = $data['valid'];
-                            $updateSuccess = $apiController->updateTestimonialValidation($testimonialId, $newValidity);
-                            if ($updateSuccess) {
-                                http_response_code(200);
-                                Model::sendJSON(["message" => "Statut de validation du témoignage mis à jour avec succès"]);
-                            } else {
-                                http_response_code(500);
-                                Model::sendJSON(["error" => "Échec de la mise à jour du statut de validation du témoignage"]);
-                            }
-                        } else {
-                            http_response_code(400);
-                            Model::sendJSON(["error" => "Données incomplètes pour la mise à jour du statut de validation du témoignage"]);
-                        }
-                        break;
-                    case 'DELETE':
-                        error_log('DELETE request received for testimonials');
-                        // Récupérer les données JSON de la requête
-                        $data = json_decode(file_get_contents("php://input"), true);
-                        error_log('DELETE data: ' . print_r($data, true));
-                        // Vérifier si l'ID du témoignage est présent
-                        if (isset($data['testimonialId'])) { // Correction ici pour 'testimonialId'
-                            $testimonialId = $data['testimonialId'];
-                            // Suppression du témoignage
-                            $deleteSuccess = $apiController->deleteTestimonial($testimonialId);
-                            if ($deleteSuccess) {
-                                http_response_code(200);
-                                Model::sendJSON(["message" => "Témoignage supprimé avec succès"]);
-                            } else {
-                                http_response_code(500);
-                                Model::sendJSON(["error" => "Échec de la suppression du témoignage"]);
-                            }
-                        } else {
-                            http_response_code(400);
-                            Model::sendJSON(["error" => "Données incomplètes pour la suppression du témoignage"]);
-                        }
                         break;
                     default:
                         error_log('Unhandled request method for testimonials: ' . $_SERVER['REQUEST_METHOD']);

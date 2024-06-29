@@ -166,6 +166,34 @@ class APIManager extends Model
         }
     }
 
+    public function deleteAnnonce($annonceId)
+    {
+        try {
+            // Préparer la requête de suppression
+            $stmt = $this->getBdd()->prepare("DELETE FROM CarAnnonce WHERE Id_CarAnnonce = :annonceId");
+            // Binder le paramètre :testimonialId avec la valeur de $testimonialId
+            $stmt->bindParam(':annonceId', $annonceId, PDO::PARAM_INT);
+            // Exécuter la requête de suppression
+            $result = $stmt->execute();
+            var_dump($result);
+            // Vérifier si la suppression a réussi
+            if ($result) {
+                error_log("ApiManager::deleteAnnonce - Annonce $annonceId supprimé avec succès");
+                return true;
+            } else {
+                error_log("ApiManager::deleteAnnonce - Échec de la suppression de l'annonce $annonceId");
+                return false;
+            }
+            // Retourne le résultat de l'exécution (true ou false)
+            return $result;
+        } catch (PDOException $e) {
+            // Gérer les erreurs PDO
+            error_log("ApiManager::deleteAnnonce - Erreur PDO: " . $e->getMessage());
+            var_dump($e->getMessage());
+            return false;
+        }
+    }
+
     public function getDBModels()
     {
         //requête pour Models
@@ -249,12 +277,6 @@ class APIManager extends Model
         }
     }
 
-    public function getDBContactMessage()
-    {
-        $req = "SELECT * FROM ContactMessage";
-        return $this->executeAndFetchAll($req);
-    }
-
     public function getDBImages()
     {
         $req = "SELECT * FROM Images";
@@ -277,6 +299,7 @@ class APIManager extends Model
             if (!$email) {
                 return false; // Retourne false si l'e-mail est invalide
             }
+            var_dump($stmt);
             // Exécution de la requête avec les valeurs des champs
             $stmt->execute([
                 htmlspecialchars($pseudo),
@@ -286,6 +309,7 @@ class APIManager extends Model
                 $note,
                 isset($TestimonialformData['userId']) ? htmlspecialchars($TestimonialformData['userId']) : null, // Si userId est null =>valeur null dans la base de données
             ]);
+
             // Retourne true si l'insertion est réussie
             return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -317,6 +341,62 @@ class APIManager extends Model
 
 
 
+    public function getDBTestimonialId($testimonialId)
+
+    {
+        $req = "SELECT * FROM Testimonials WHERE Id_Testimonials = :testimonialId";
+        // var_dump($testimonialId);
+        try {
+            // Je prépare la requête dans le statement
+            $stmt = $this->getBdd()->prepare($req);
+            // Je lie le paramètre :id à la valeur de $id
+            $stmt->bindValue(":testimonialId", $testimonialId, PDO::PARAM_INT);
+            // Je lance son exécution
+            $stmt->execute();
+            var_dump($stmt);
+            // Je récupère les données
+            $car = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Je ferme le curseur pour finir la requête et la connexion à la DB
+            $stmt->closeCursor();
+            // Je retourne les données au controller
+            return $car;
+        } catch (PDOException $e) {
+            // Je gère l'exception en loggant l'erreur
+            error_log("Error in Id: " . $e->getMessage());
+            // Je renvoie une réponse adaptée à l'erreur
+            return "réussi";
+        }
+    }
+
+    public function updateTestimonialValidation($testimonialId, $newValidity)
+    {
+        // Prépare la requête SQL pour mettre à jour le statut de validation dans la table CarAnnonce
+        $query = "UPDATE Testimonials SET valid = :status WHERE Id_Testimonials = :id";
+        try {
+            // Prépare la requête SQL
+            $valid = 0;
+            if ($newValidity) {
+                $valid = 1;
+            }
+            $stmt = $this->getBdd()->prepare($query);
+            // Journalise l'ID de l'annonce et la nouvelle validité pour le suivi et le débogage
+            error_log("Testimonial ID: " . $testimonialId);
+            error_log("New Validity: " . $valid);
+            // Lie les valeurs aux paramètres de la requête SQL
+            $stmt->bindValue(':id', $testimonialId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $valid, PDO::PARAM_INT);
+            // Journalise la requête SQL pour le suivi et le débogage
+            error_log("SQL Query: " . $query);
+            // Exécute la requête SQL préparée
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Gère les erreurs PDO, les journalise pour le suivi et retourne faux en cas d'erreur
+            error_log("Error in updateTestimonialValidation: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
     public function deleteTestimonial($testimonialId)
     {
         try {
@@ -329,10 +409,12 @@ class APIManager extends Model
             // Vérifier si la suppression a réussi
             if ($result) {
                 error_log("ApiManager::deleteTestimonial - Témoignage $testimonialId supprimé avec succès");
+                return true;
             } else {
                 error_log("ApiManager::deleteTestimonial - Échec de la suppression du témoignage $testimonialId");
+                return false;
             }
-            // Retourner le résultat de l'exécution (true ou false)
+            // Retourne le résultat de l'exécution (true ou false)
             return $result;
         } catch (PDOException $e) {
             // Gérer les erreurs PDO
@@ -423,11 +505,11 @@ class APIManager extends Model
     public function insertMessageAnnonce($Id_CarAnnonce, $formData)
     {
         // Vérification des propriétés de l'objet et définition des valeurs par défaut
-        $userName = isset($formData->userName) ? $formData->userName : '';
-        $userEmail = isset($formData->userEmail) ? $formData->userEmail : '';
-        $userPhone = isset($formData->userPhone) ? $formData->userPhone : '';
-        $message = isset($formData->message) ? $formData->message : '';
-        $createdAt = isset($formData->createdAt) ? $formData->createdAt : date('Y-m-d H:i:s'); // Date de création actuelle
+        $userName = isset($formData["userName"]) ? $formData["userName"] : '';
+        $userEmail = isset($formData["userEmail"]) ? $formData["userEmail"] : '';
+        $userPhone = isset($formData["userPhone"]) ? $formData["userPhone"] : '';
+        $message = isset($formData["message"]) ? $formData["message"] : '';
+        $createdAt = isset($formData["createdAt"]) ? $formData["createdAt"] : date('Y-m-d H:i:s'); // Date de création actuelle
         // Requête SQL paramétrée pour insérer les données dans la table MessageAnnonce
         $sql = "INSERT INTO MessageAnnonce (userName, userEmail, userPhone, message, createdAt, Id_CarAnnonce) VALUES (?, ?, ?, ?, ?, ?)";
         try {
@@ -452,21 +534,29 @@ class APIManager extends Model
         }
     }
 
+
+    public function getDBContactMessage()
+    {
+        $req = "SELECT * FROM ContactMessage";
+        return $this->executeAndFetchAll($req);
+    }
+
     public function insertContactMessage($formData)
     {
         $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
         try {
+            var_dump($formData);
             $stmt = $this->getBdd()->prepare($req);
-            // Valide et échappe les données
-            $name = substr($formData->name, 0, 255); // Limiterla longueur du champ à 255 caractères
-            $email = filter_var($formData->email, FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
-            $phone = preg_replace("/[^0-9]/", "", $formData->phone); // Supprime les caractères non numériques
-            $message = substr($formData->message, 0, 1000); // Limite la longueur du champ à 1000 caractères
-            // Vérification de la validité de l'e-mail
+            // Valider et échapper les données
+            $name = htmlspecialchars(strip_tags(substr($formData["name"], 0, 255)), ENT_QUOTES, 'UTF-8'); // Limiter la longueur du champ à 255 caractères et échapper les caractères spéciaux
+            $email = filter_var($formData["email"], FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
+            $phone = htmlspecialchars(strip_tags(preg_replace("/[^0-9]/", "", $formData["phone"])), ENT_QUOTES, 'UTF-8'); // Supprime les caractères non numériques et échapper les caractères spéciaux
+            $message = htmlspecialchars(strip_tags(substr($formData["message"], 0, 1000)), ENT_QUOTES, 'UTF-8'); // Limite la longueur du champ à 1000 caractères et échapper les caractères spéciaux
+            var_dump($formData["name"]);  // Vérification de la validité de l'e-mail
             if (!$email) {
                 return false; // Retourne false si l'e-mail est invalide
             }
-            // Exécute de la requête avec les valeurs des champs
+            // Exécute la requête avec les valeurs des champs
             $stmt->execute([$name, $email, $phone, $message]);
             // Vérification du nombre de lignes affectées pour s'assurer que l'insertion s'est bien déroulée
             if ($stmt->rowCount() > 0) {
@@ -480,6 +570,7 @@ class APIManager extends Model
             return false;
         }
     }
+
 
     // Méthode pour créer une annonce
     public function createAnnonce($annonceData)
@@ -599,35 +690,35 @@ class APIManager extends Model
         }
     }
 
-    // Méthode pour supprimer une annonce
-    public function deleteAnnonce($id)
-    {
-        try {
-            $this->getBdd()->beginTransaction();
-            // Supprime les enregistrements de la table CarsOptions liés à cette annonce
-            $reqOptions = "DELETE FROM CarsOptions WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
-            $stmtOptions = $this->getBdd()->prepare($reqOptions);
-            $stmtOptions->execute([':id' => $id]);
-            // Supprime les enregistrements de la table CarsEnergy liés à cette annonce
-            $reqEnergy = "DELETE FROM CarsEnergy WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
-            $stmtEnergy = $this->getBdd()->prepare($reqEnergy);
-            $stmtEnergy->execute([':id' => $id]);
-            // Supprime les enregistrements de la table Cars liés à cette annonce
-            $reqCar = "DELETE FROM Cars WHERE Id_CarAnnonce = :id";
-            $stmtCar = $this->getBdd()->prepare($reqCar);
-            $stmtCar->execute([':id' => $id]);
-            // Supprime l'annonce de la table CarAnnonce
-            $reqAnnonce = "DELETE FROM CarAnnonce WHERE Id_CarAnnonce = :id";
-            $stmtAnnonce = $this->getBdd()->prepare($reqAnnonce);
-            $stmtAnnonce->execute([':id' => $id]);
-            $this->getBdd()->commit();
-            return true;
-        } catch (PDOException $e) {
-            $this->getBdd()->rollBack();
-            error_log("Error in deleteAnnonce: " . $e->getMessage());
-            return false;
-        }
-    }
+    // // Méthode pour supprimer une annonce
+    // public function deleteAnnonce($id)
+    // {
+    //     try {
+    //         $this->getBdd()->beginTransaction();
+    //         // Supprime les enregistrements de la table CarsOptions liés à cette annonce
+    //         $reqOptions = "DELETE FROM CarsOptions WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
+    //         $stmtOptions = $this->getBdd()->prepare($reqOptions);
+    //         $stmtOptions->execute([':id' => $id]);
+    //         // Supprime les enregistrements de la table CarsEnergy liés à cette annonce
+    //         $reqEnergy = "DELETE FROM CarsEnergy WHERE Id_Cars = (SELECT Id_Cars FROM Cars WHERE Id_CarAnnonce = :id)";
+    //         $stmtEnergy = $this->getBdd()->prepare($reqEnergy);
+    //         $stmtEnergy->execute([':id' => $id]);
+    //         // Supprime les enregistrements de la table Cars liés à cette annonce
+    //         $reqCar = "DELETE FROM Cars WHERE Id_CarAnnonce = :id";
+    //         $stmtCar = $this->getBdd()->prepare($reqCar);
+    //         $stmtCar->execute([':id' => $id]);
+    //         // Supprime l'annonce de la table CarAnnonce
+    //         $reqAnnonce = "DELETE FROM CarAnnonce WHERE Id_CarAnnonce = :id";
+    //         $stmtAnnonce = $this->getBdd()->prepare($reqAnnonce);
+    //         $stmtAnnonce->execute([':id' => $id]);
+    //         $this->getBdd()->commit();
+    //         return true;
+    //     } catch (PDOException $e) {
+    //         $this->getBdd()->rollBack();
+    //         error_log("Error in deleteAnnonce: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     public function updateValidationStatus($annonceId, $newValidity)
     {
