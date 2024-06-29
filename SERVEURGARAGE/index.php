@@ -24,7 +24,7 @@ $apiController = new APIController();
 
 // Définition des en-têtes CORS
 header("Access-Control-Allow-Origin: https://ggevparrot.vercel.app");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // Vérifie si la demande est une demande OPTIONS préalable
@@ -158,17 +158,58 @@ switch ($url[0]) {
                 }
                 break;
             case "testimonials":
-                // Gérer les méthodes pour les témoignages
-                if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                    $apiController->getTestimonials();
-                } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    $apiController->insertTestimonial();
-                    // } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-                    //     $apiController->updateTestimonial();
-                    // } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-                    //     $apiController->deleteTestimonial();
-                } else {
-                    throw new Exception("Méthode non autorisée");
+                switch ($_SERVER['REQUEST_METHOD']) {
+                    case 'GET':
+                        $apiController->getTestimonials();
+                        break;
+                    case 'POST':
+                        $apiController->insertTestimonial();
+                        break;
+                    case 'PUT':
+                        error_log('PUT request received for testimonials');
+                        $data = json_decode(file_get_contents("php://input"), true);
+                        error_log('PUT data: ' . print_r($data, true));
+                        if (isset($data['valid'], $data['testimonialId'])) {
+                            $testimonialId = $data['testimonialId'];
+                            $newValidity = $data['valid'];
+                            $updateSuccess = $apiController->updateTestimonialValidation($testimonialId, $newValidity);
+                            if ($updateSuccess) {
+                                http_response_code(200);
+                                Model::sendJSON(["message" => "Statut de validation du témoignage mis à jour avec succès"]);
+                            } else {
+                                http_response_code(500);
+                                Model::sendJSON(["error" => "Échec de la mise à jour du statut de validation du témoignage"]);
+                            }
+                        } else {
+                            http_response_code(400);
+                            Model::sendJSON(["error" => "Données incomplètes pour la mise à jour du statut de validation du témoignage"]);
+                        }
+                        break;
+                    case 'DELETE':
+                        error_log('DELETE request received for testimonials');
+                        // Récupérer les données JSON de la requête
+                        $data = json_decode(file_get_contents("php://input"), true);
+                        error_log('DELETE data: ' . print_r($data, true));
+                        // Vérifier si l'ID du témoignage est présent
+                        if (isset($data['testimonialId'])) { // Correction ici pour 'testimonialId'
+                            $testimonialId = $data['testimonialId'];
+                            // Suppression du témoignage
+                            $deleteSuccess = $apiController->deleteTestimonial($testimonialId);
+                            if ($deleteSuccess) {
+                                http_response_code(200);
+                                Model::sendJSON(["message" => "Témoignage supprimé avec succès"]);
+                            } else {
+                                http_response_code(500);
+                                Model::sendJSON(["error" => "Échec de la suppression du témoignage"]);
+                            }
+                        } else {
+                            http_response_code(400);
+                            Model::sendJSON(["error" => "Données incomplètes pour la suppression du témoignage"]);
+                        }
+                        break;
+                    default:
+                        error_log('Unhandled request method for testimonials: ' . $_SERVER['REQUEST_METHOD']);
+                        throw new Exception("Méthode non autorisée");
                 }
                 break;
             case "opening":

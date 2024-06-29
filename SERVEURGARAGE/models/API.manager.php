@@ -284,7 +284,7 @@ class APIManager extends Model
                 htmlspecialchars($message),
                 htmlspecialchars($TestimonialformData['createdAt']),
                 $note,
-                isset($TestimonialformData['userId']) ? htmlspecialchars($TestimonialformData['userId']) : null, // Si userId est null, utilisez la valeur null dans la base de données
+                isset($TestimonialformData['userId']) ? htmlspecialchars($TestimonialformData['userId']) : null, // Si userId est null =>valeur null dans la base de données
             ]);
             // Retourne true si l'insertion est réussie
             return $stmt->rowCount() > 0;
@@ -299,7 +299,46 @@ class APIManager extends Model
     public function getDBTestimonials()
     {
         $req = "SELECT * FROM Testimonials";
+        try {
+            // Exécute la requête SQL et retourne tous les résultats
+            return $this->executeAndFetchAll($req);
+        } catch (PDOException $e) {
+            // En cas d'erreur, enregistre l'erreur et lance une exception
+            error_log("Error in getDBTestimonials: " . $e->getMessage());
+            throw new Exception("Failed to fetch testimonials from database.");
+        }
+    }
+
+    public function getDBValidTestimonials()
+    {
+        $req = "SELECT * FROM Testimonials WHERE valid = 1";
         return $this->executeAndFetchAll($req);
+    }
+
+
+
+    public function deleteTestimonial($testimonialId)
+    {
+        try {
+            // Préparer la requête de suppression
+            $stmt = $this->getBdd()->prepare("DELETE FROM Testimonials WHERE Id_Testimonials = :testimonialId");
+            // Binder le paramètre :testimonialId avec la valeur de $testimonialId
+            $stmt->bindParam(':testimonialId', $testimonialId, PDO::PARAM_INT);
+            // Exécuter la requête de suppression
+            $result = $stmt->execute();
+            // Vérifier si la suppression a réussi
+            if ($result) {
+                error_log("ApiManager::deleteTestimonial - Témoignage $testimonialId supprimé avec succès");
+            } else {
+                error_log("ApiManager::deleteTestimonial - Échec de la suppression du témoignage $testimonialId");
+            }
+            // Retourner le résultat de l'exécution (true ou false)
+            return $result;
+        } catch (PDOException $e) {
+            // Gérer les erreurs PDO
+            error_log("ApiManager::deleteTestimonial - Erreur PDO: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getDBOpening()
@@ -494,7 +533,6 @@ class APIManager extends Model
             ]);
             // Récupère l'ID du modèle inséré
             $modelId = $this->getBdd()->lastInsertId();
-
             // Requête pour insérer dans la table ModelsManufactureYears
             $reqManufactureYears = "INSERT INTO ModelsManufactureYears (Id_Model, Id_ManufactureYears) VALUES (:Id_Model, :Id_ManufactureYears)";
             $stmtManufactureYears = $this->getBdd()->prepare($reqManufactureYears);
