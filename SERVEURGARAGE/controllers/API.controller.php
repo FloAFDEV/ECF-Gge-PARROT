@@ -138,7 +138,7 @@ class APIController
                 return;
             }
             $result = $this->apiManager->insertTestimonial($formData);
-            var_dump($result);
+            // var_dump($result);
             if ($result === true) {
                 $this->sendJSONResponse(["success" => "Votre témoignage a bien été enregistré"], HTTP_OK);
             } else {
@@ -160,7 +160,7 @@ class APIController
                 return;
             }
             $result = $this->apiManager->updateTestimonialValidation($testimonialId, $newValidity);
-            var_dump($result);
+            // var_dump($result);
             if ($result) {
                 $this->sendJSONResponse(["message" => "Témoignage mis à jour avec succès"], HTTP_OK);
                 return true;

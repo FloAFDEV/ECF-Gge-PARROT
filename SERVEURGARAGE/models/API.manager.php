@@ -175,7 +175,7 @@ class APIManager extends Model
             $stmt->bindParam(':annonceId', $annonceId, PDO::PARAM_INT);
             // Exécuter la requête de suppression
             $result = $stmt->execute();
-            var_dump($result);
+            // var_dump($result);
             // Vérifier si la suppression a réussi
             if ($result) {
                 error_log("ApiManager::deleteAnnonce - Annonce $annonceId supprimé avec succès");
@@ -189,7 +189,7 @@ class APIManager extends Model
         } catch (PDOException $e) {
             // Gérer les erreurs PDO
             error_log("ApiManager::deleteAnnonce - Erreur PDO: " . $e->getMessage());
-            var_dump($e->getMessage());
+            // var_dump($e->getMessage());
             return false;
         }
     }
@@ -299,7 +299,7 @@ class APIManager extends Model
             if (!$email) {
                 return false; // Retourne false si l'e-mail est invalide
             }
-            var_dump($stmt);
+            // var_dump($stmt);
             // Exécution de la requête avec les valeurs des champs
             $stmt->execute([
                 htmlspecialchars($pseudo),
@@ -353,7 +353,7 @@ class APIManager extends Model
             $stmt->bindValue(":testimonialId", $testimonialId, PDO::PARAM_INT);
             // Je lance son exécution
             $stmt->execute();
-            var_dump($stmt);
+            // var_dump($stmt);
             // Je récupère les données
             $car = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // Je ferme le curseur pour finir la requête et la connexion à la DB
@@ -545,14 +545,14 @@ class APIManager extends Model
     {
         $req = "INSERT INTO ContactMessage (name, email, phone, message) VALUES (?, ?, ?, ?)";
         try {
-            var_dump($formData);
+            // var_dump($formData);
             $stmt = $this->getBdd()->prepare($req);
             // Valider et échapper les données
             $name = htmlspecialchars(strip_tags(substr($formData["name"], 0, 255)), ENT_QUOTES, 'UTF-8'); // Limiter la longueur du champ à 255 caractères et échapper les caractères spéciaux
             $email = filter_var($formData["email"], FILTER_VALIDATE_EMAIL); // Validation de l'e-mail
             $phone = htmlspecialchars(strip_tags(preg_replace("/[^0-9]/", "", $formData["phone"])), ENT_QUOTES, 'UTF-8'); // Supprime les caractères non numériques et échapper les caractères spéciaux
             $message = htmlspecialchars(strip_tags(substr($formData["message"], 0, 1000)), ENT_QUOTES, 'UTF-8'); // Limite la longueur du champ à 1000 caractères et échapper les caractères spéciaux
-            var_dump($formData["name"]);  // Vérification de la validité de l'e-mail
+            // var_dump($formData["name"]);  // Vérification de la validité de l'e-mail
             if (!$email) {
                 return false; // Retourne false si l'e-mail est invalide
             }

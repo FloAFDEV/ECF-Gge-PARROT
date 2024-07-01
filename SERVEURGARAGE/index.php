@@ -69,9 +69,39 @@ if (!in_array($url[1], $allowedActions)) {
 }
 switch ($url[0]) {
     case "api":
+
         switch ($url[1]) {
             case "annonces":
-                if (isset($url[2]) && is_numeric($url[2])) {
+
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+                    // Récupére les données JSON envoyées dans la requête POST depuis le front
+                    $data = json_decode(file_get_contents("php://input"), true);
+                    // Vérifieque toute les données soient présentes
+                    if (
+                        isset($data['annonce_title']) &&
+                        isset($data['brand_name']) &&
+                        isset($data['registration']) &&
+                        isset($data['price']) &&
+                        isset($data['power']) &&
+                        isset($data['power_unit']) &&
+                        isset($data['color']) &&
+                        isset($data['model_name']) &&
+                        isset($data['category_model']) &&
+                        isset($data['manufacture_year']) &&
+                        isset($data['fuel_type']) &&
+                        isset($data['options_name'])
+                    ) {
+
+                        $apiController->createAnnonce($data);
+                        // Message de succès
+                        http_response_code(201); // Code 201 pour cré   ation ok
+                        echo json_encode(array("message" => "Annonce créée avec succès"));
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(array("error" => "Toutes les données obligatoires ne sont pas fournies"));
+                    }
+                } elseif (isset($url[2]) && is_numeric($url[2])) {
                     if ($_SERVER['REQUEST_METHOD'] === 'PUT' && isset($url[3]) && $url[3] === 'validite') {
                         // Récupére le statut de validité depuis les données POST
                         $data = json_decode(file_get_contents("php://input"), true);
@@ -81,7 +111,7 @@ switch ($url[0]) {
                     } else {
                         $apiController->getAnnonceByID($url[2]);
                     }
-                } elseif (!isset($url[2])) {
+                } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $apiController->getAllAnnonces();
                 } else {
                     throw new Exception("Identifiant du véhicule invalide");
@@ -89,12 +119,6 @@ switch ($url[0]) {
                 break;
             case "annonce":
                 switch ($url[2]) {
-                    case ($_SERVER['REQUEST_METHOD'] === 'GET'):
-                        if (isset($url[2]) && is_numeric($url[2])) {
-                            // var_dump($url[2]);
-                            $apiController->getAllAnnonces($url[2]);
-                        }
-                        break;
                     case ($_SERVER['REQUEST_METHOD'] === 'DELETE'):
                         error_log('DELETE request received for annonces');
                         if (isset($url[2]) && is_numeric($url[2])) {
@@ -130,6 +154,7 @@ switch ($url[0]) {
                 }
                 break;
             case "garage":
+
                 // Gérer les méthodes pour les modèles
                 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $apiController->getGarage();
@@ -186,7 +211,7 @@ switch ($url[0]) {
                 }
                 break;
             case "testimonial":
-                var_dump($_SERVER['REQUEST_METHOD']);
+                // var_dump($_SERVER['REQUEST_METHOD']);
                 switch ($url[2]) {
                     case ($_SERVER['REQUEST_METHOD'] === 'GET'):
                         if (isset($url[2]) && is_numeric($url[2])) {
@@ -202,7 +227,7 @@ switch ($url[0]) {
                                 $testimonialId = $url[2];
                                 $newValidity = $data['valid'];
                                 $updateSuccess = $apiController->updateTestimonialValidation($testimonialId, $newValidity);
-                                var_dump($updateSuccess);
+                                // var_dump($updateSuccess);
                                 if ($updateSuccess) {
                                     http_response_code(200);
                                     return   Model::sendJSON(["message" => "Statut de validation du témoignage mis à jour avec succès"]);
