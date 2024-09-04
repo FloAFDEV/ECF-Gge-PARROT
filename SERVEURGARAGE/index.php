@@ -69,12 +69,9 @@ if (!in_array($url[1], $allowedActions)) {
 }
 switch ($url[0]) {
     case "api":
-
         switch ($url[1]) {
             case "annonces":
-
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
                     // Récupére les données JSON envoyées dans la requête POST depuis le front
                     $data = json_decode(file_get_contents("php://input"), true);
                     // Vérifieque toute les données soient présentes
@@ -92,7 +89,6 @@ switch ($url[0]) {
                         isset($data['fuel_type']) &&
                         isset($data['options_name'])
                     ) {
-
                         $apiController->createAnnonce($data);
                         // Message de succès
                         http_response_code(201); // Code 201 pour cré   ation ok
